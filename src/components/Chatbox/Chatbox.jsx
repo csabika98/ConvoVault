@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useSessions } from "@/context/SessionsContext";
 import { getAiReply } from "@/services/aiRouting";
+import { Spinner } from "@/components/ui/spinner"
 
 function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
@@ -177,9 +178,10 @@ function Chatbox({ selectedSessionId }) {
                     AI
                   </AvatarPrimitive.Avatar.Fallback>
                 </AvatarPrimitive.Avatar.Root>
-                <Card>
-                  <CardContent className="px-3 py-2">Thinking...</CardContent>
-                </Card>
+                <Button variant="outline" disabled>
+                  <Spinner data-icon="inline-start" />
+                  Generating
+                </Button>
               </div>
             ) : null}
           </div>

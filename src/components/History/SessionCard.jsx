@@ -18,9 +18,11 @@ function SessionCard({
 }) {
   return (
     <Item
-      variant="outline"
-      className={`group flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
-        isActive ? "ring-2 ring-ring" : ""
+      variant="muted"
+      className={`group flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border ${
+        isActive
+          ? "bg-primary/5 border-primary/30 text-foreground"
+          : "border-border"
       }`}
       onClick={() => onSelect(sessionId)}
       role="button"
@@ -32,12 +34,16 @@ function SessionCard({
         }
       }}
     >
-      <Badge variant="secondary" className="shrink-0 text-xs">
+      <Badge variant="outline" className="shrink-0 text-xs">
         #{counter}
       </Badge>
 
       <ItemContent className="min-w-0 flex-1 p-0">
-        <ItemTitle className="truncate">{title}</ItemTitle>
+        <ItemTitle className={`truncate font-medium ${
+          isActive ? "text-foreground" : "text-muted-foreground"
+        }`}>
+          {title}
+        </ItemTitle>
       </ItemContent>
 
       <ItemActions className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
