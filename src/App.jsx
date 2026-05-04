@@ -4,6 +4,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import History from "./components/History/History";
+import Chatbox from "./components/Chatbox/Chatbox";
 
 
 function App() {
@@ -11,23 +12,23 @@ function App() {
     <>
       <ResizablePanelGroup
         orientation="horizontal"
-        className="h-screen w-full rounded-lg border"
+        className="min-w-0 rounded-lg border"
       >
         <ResizablePanel defaultSize={20}>
-          <div className="flex h-full items-center justify-center p-6">
+          <div className="flex h-full min-h-0 min-w-0 flex-col overflow-auto p-6">
             {/*<span className="font-semibold">Sidebar</span>*/}
             <History />
           </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={60}>
-          <div className="flex h-full items-center justify-center p-6">
-            <span className="font-semibold">Chatbox</span>
+          <div className="flex h-full min-h-0 min-w-0 flex-col p-6">
+            <Chatbox />
           </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={20}>
-          <div className="flex h-full items-center justify-center p-6">
+          <div className="flex h-full min-h-0 min-w-0 flex-col items-center justify-center p-6">
             <span className="font-semibold">Profile</span>
           </div>
         </ResizablePanel>

@@ -25,7 +25,7 @@ function History() {
 
   return (
     <>
-      <div className="w-full min-h-screen bg-background p-1">
+      <div className="h-full min-h-0 w-full bg-background p-1">
         <h1 className="mb-4">History</h1>
         <Separator className="mb-6" />
         <div className="flex flex-col gap-4 max-w-6xl mx-auto w-full">
