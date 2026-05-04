@@ -5,9 +5,11 @@ import { Plus } from "lucide-react";
 import { useSessions } from "@/context/SessionsContext";
 
 function History({ selectedSessionId, onSessionSelect }) {
-  const { sessions, addSession, deleteSession } = useSessions();
+  const { sessions, addSession, deleteSession, sessionsAreFull } = useSessions();
 
   const handleAddSession = () => {
+    if (sessionsAreFull) return;
+
     const newSessionId = addSession({
       title: `Session ${sessions.length + 1}`,
       description: `Description for session ${sessions.length + 1}`,
@@ -39,8 +41,8 @@ function History({ selectedSessionId, onSessionSelect }) {
             />
           ))}
         </div>
-        <Button className="mt-6 rounded-full" onClick={handleAddSession}>
-          <Plus />
+        <Button className="mt-6 rounded-full" onClick={handleAddSession} disabled={sessionsAreFull}>
+          {sessionsAreFull ? "Max 5 sessions" : <Plus />}
         </Button>
       </div>
     </>
