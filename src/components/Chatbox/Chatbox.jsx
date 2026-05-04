@@ -16,7 +16,10 @@ function Chatbox({ selectedSessionId }) {
   useEffect(() => {
     const el = messagesContainerRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    const frame = requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+    return () => cancelAnimationFrame(frame);
   }, [activeMessages.length, selectedSessionId]);
 
   function handleSend() {
@@ -44,7 +47,7 @@ function Chatbox({ selectedSessionId }) {
         ) : activeMessages.length === 0 ? (
           `No messages yet for ${selectedSessionId}.`
         ) : (
-          <div className="flex min-h-full flex-col gap-2">
+          <div className="flex min-h-full flex-col justify-end gap-2">
             {activeMessages.map((item) => (
               <div key={item.id} className="ml-auto flex max-w-[85%] items-end gap-2">
                 <Card className="w-fit bg-muted">
