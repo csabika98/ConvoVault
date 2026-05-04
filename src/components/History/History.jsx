@@ -12,7 +12,6 @@ function History({ selectedSessionId, onSessionSelect }) {
 
     const newSessionId = addSession({
       title: `Session ${sessions.length + 1}`,
-      description: `Description for session ${sessions.length + 1}`,
     });
 
     onSessionSelect(newSessionId);
