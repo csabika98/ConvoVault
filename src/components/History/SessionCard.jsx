@@ -8,11 +8,27 @@ function SessionCard({
   title = "Card Title",
   description = "This is the card description.",
   counter = "1",
+  sessionId,
+  isActive = false,
+  onSelect,
   onDelete
 }) {
 
   return (
-    <Card className="relative group">
+    <Card
+      className={`relative group cursor-pointer transition-colors ${
+        isActive ? "ring-2 ring-ring" : ""
+      }`}
+      onClick={() => onSelect(sessionId)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(sessionId);
+        }
+      }}
+    >
       {/* Top-right counter */}
       <div className="absolute top-4 right-4 z-10">
         <Badge variant="secondary" className="text-xs">#{counter}</Badge>

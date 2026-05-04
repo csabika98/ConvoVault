@@ -2,25 +2,22 @@ import SessionCard from "./SessionCard";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useSessions } from "@/context/SessionsContext";
 
-function History() {
-  const [sessions, setSessions] = useState([]);
+function History({ selectedSessionId, onSessionSelect }) {
+  const { sessions, addSession, deleteSession } = useSessions();
 
-  const addSession = () => {
-    const nextId = Math.max(...sessions.map((s) => s.id), 0) + 1;
-    setSessions((prev) => [
-      ...prev,
-      {
-        id: nextId,
-        title: `Session ${nextId}`,
-        description: `Description for session ${nextId}`,
-      },
-    ]);
+  const handleAddSession = () => {
+    const newSessionId = addSession({
+      title: `Session ${sessions.length + 1}`,
+      description: `Description for session ${sessions.length + 1}`,
+    });
+
+    onSessionSelect(newSessionId);
   };
 
-  const deleteSession = (idToDelete) => {
-    setSessions((prev) => prev.filter((session) => session.id !== idToDelete));
+  const handleDeleteSession = (idToDelete) => {
+    deleteSession(idToDelete);
   };
 
   return (
@@ -35,11 +32,14 @@ function History() {
               title={session.title}
               description={session.description}
               counter={String(index + 1)}
-              onDelete={() => deleteSession(session.id)}
+              sessionId={session.id}
+              isActive={selectedSessionId === session.id}
+              onSelect={onSessionSelect}
+              onDelete={() => handleDeleteSession(session.id)}
             />
           ))}
         </div>
-        <Button className="mt-6 rounded-full" onClick={addSession}>
+        <Button className="mt-6 rounded-full" onClick={handleAddSession}>
           <Plus />
         </Button>
       </div>
