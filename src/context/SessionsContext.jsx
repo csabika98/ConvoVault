@@ -1,4 +1,3 @@
-// src/context/SessionsContext.jsx
 import { createContext, useContext, useState } from "react";
 
 const SessionsContext = createContext(null);
@@ -17,7 +16,7 @@ export function SessionsProvider({ children }) {
       { id: nextId, ...newSession },
     ]);
 
-    return nextId; // return the new id for selection
+    return nextId;
   };
 
   const deleteSession = (idToDelete) => {
