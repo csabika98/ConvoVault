@@ -1,11 +1,15 @@
 import { createContext, useContext, useState } from "react";
 
+const MAX_SESSIONS = 5;
+
 const SessionsContext = createContext(null);
 
 export function SessionsProvider({ children }) {
   const [sessions, setSessions] = useState([]);
 
   const addSession = (newSession) => {
+    if (sessions.length >= MAX_SESSIONS) return null;
+
     const nextId =
       sessions.length > 0
         ? Math.max(...sessions.map((s) => s.id)) + 1
@@ -25,7 +29,7 @@ export function SessionsProvider({ children }) {
 
   return (
     <SessionsContext.Provider
-      value={{ sessions, addSession, deleteSession }}
+      value={{ sessions, addSession, deleteSession, sessionsAreFull: sessions.length >= MAX_SESSIONS }}
     >
       {children}
     </SessionsContext.Provider>
