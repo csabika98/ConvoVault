@@ -4,14 +4,14 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
-export function SessionCard({
+function SessionCard({
   title = "Card Title",
   description = "This is the card description.",
   counter = "1",
   sessionId,
   isActive = false,
   onSelect,
-  /*onDelete*/
+  onDelete
 }) {
 
   return (
@@ -19,13 +19,13 @@ export function SessionCard({
       className={`relative group cursor-pointer transition-colors ${
         isActive ? "ring-2 ring-ring" : ""
       }`}
-      onClick={() => onSelect?.(sessionId)}
+      onClick={() => onSelect(sessionId)}
       role="button"
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          onSelect?.(sessionId);
+          onSelect(sessionId);
         }
       }}
     >
@@ -42,7 +42,6 @@ export function SessionCard({
 
       <CardContent className="pb-12 pt-0">
         <CardDescription>{description}</CardDescription>
-        <p className="mt-2 text-xs text-muted-foreground">Session: {sessionId}</p>
       </CardContent>
 
       {/* Bottom-right delete button - hidden until hover */}
@@ -50,8 +49,7 @@ export function SessionCard({
         variant="ghost"
         size="icon"
         className="absolute bottom-4 right-4 h-8 w-8 rounded-full p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
-        onClick={(event) => event.stopPropagation()}
-        /*onClick={onDelete}*/
+        onClick={onDelete}
       >
         <Trash2 className="h-4 w-4" />
         <span className="sr-only">Delete</span>

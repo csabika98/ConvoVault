@@ -9,7 +9,7 @@ import Chatbox from "./components/Chatbox/Chatbox";
 
 
 function App() {
-  const [selectedSessionId, setSelectedSessionId] = useState("session-1");
+  const [selectedSessionId, setSelectedSessionId] = useState("");
 
   return (
     <>

@@ -1,39 +1,47 @@
 import SessionCard from "./SessionCard";
 import { Separator } from "@/components/ui/separator";
-
-const MOCK_SESSIONS = [
-  {
-    sessionId: "session-1",
-    title: "Card Title",
-    description: "This is the card description.",
-  },
-  {
-    sessionId: "session-2",
-    title: "Card Title",
-    description: "This is the card description.",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useSessions } from "@/context/SessionsContext";
 
 function History({ selectedSessionId, onSessionSelect }) {
+  const { sessions, addSession, deleteSession } = useSessions();
+
+  const handleAddSession = () => {
+    const newSessionId = addSession({
+      title: `Session ${sessions.length + 1}`,
+      description: `Description for session ${sessions.length + 1}`,
+    });
+
+    onSessionSelect(newSessionId);
+  };
+
+  const handleDeleteSession = (idToDelete) => {
+    deleteSession(idToDelete);
+  };
 
   return (
     <>
       <div className="h-full min-h-0 w-full bg-background p-1">
         <h1 className="mb-4">History</h1>
         <Separator className="mb-6" />
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
-            {MOCK_SESSIONS.map((session, index) => (
-              <SessionCard
-                key={session.sessionId}
-                counter={String(index + 1)}
-                sessionId={session.sessionId}
-                title={session.title}
-                description={session.description}
-                isActive={selectedSessionId === session.sessionId}
-                onSelect={onSessionSelect}
-              />
-            ))}
-          </div>
+        <div className="flex flex-col gap-4 max-w-6xl mx-auto w-full">
+          {sessions.map((session, index) => (
+            <SessionCard
+              key={session.id}
+              title={session.title}
+              description={session.description}
+              counter={String(index + 1)}
+              sessionId={session.id}
+              isActive={selectedSessionId === session.id}
+              onSelect={onSessionSelect}
+              onDelete={() => handleDeleteSession(session.id)}
+            />
+          ))}
+        </div>
+        <Button className="mt-6 rounded-full" onClick={handleAddSession}>
+          <Plus />
+        </Button>
       </div>
     </>
   )
