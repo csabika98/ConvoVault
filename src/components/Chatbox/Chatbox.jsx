@@ -2,16 +2,47 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as AvatarPrimitive from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useSessions } from "@/context/SessionsContext";
 
 function Chatbox({ selectedSessionId }) {
+  const { sessions } = useSessions();
   const [message, setMessage] = useState("");
   const [messagesBySession, setMessagesBySession] = useState({});
   const messagesContainerRef = useRef(null);
+  const sessionIds = useMemo(
+    () => new Set(sessions.map((session) => String(session.id))),
+    [sessions]
+  );
+  const selectedSessionKey = selectedSessionId ? String(selectedSessionId) : "";
+  const hasSelectedSession = Boolean(selectedSessionKey && sessionIds.has(selectedSessionKey));
 
   const activeMessages = useMemo(() => {
-    if (!selectedSessionId) return [];
-    return messagesBySession[selectedSessionId] ?? [];
-  }, [messagesBySession, selectedSessionId]);
+    if (!hasSelectedSession) return [];
+    return messagesBySession[selectedSessionKey] ?? [];
+  }, [messagesBySession, selectedSessionKey, hasSelectedSession]);
+
+  useEffect(() => {
+    setMessagesBySession((prev) => {
+      const next = {};
+      let changed = false;
+
+      for (const [sessionId, messages] of Object.entries(prev)) {
+        if (sessionIds.has(sessionId)) {
+          next[sessionId] = messages;
+        } else {
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [sessionIds]);
+
+  useEffect(() => {
+    if (!hasSelectedSession) {
+      setMessage("");
+    }
+  }, [hasSelectedSession]);
 
   useEffect(() => {
     const el = messagesContainerRef.current;
@@ -24,12 +55,12 @@ function Chatbox({ selectedSessionId }) {
 
   function handleSend() {
     const text = message.trim();
-    if (!text || !selectedSessionId) return;
+    if (!text || !hasSelectedSession) return;
 
     setMessagesBySession((prev) => ({
       ...prev,
-      [selectedSessionId]: [
-        ...(prev[selectedSessionId] ?? []),
+      [selectedSessionKey]: [
+        ...(prev[selectedSessionKey] ?? []),
         { id: crypto.randomUUID(), content: text, role: "user" },
       ],
     }));
@@ -44,6 +75,8 @@ function Chatbox({ selectedSessionId }) {
       >
         {!selectedSessionId ? (
           "Select a session from History to view messages."
+        ) : !hasSelectedSession ? (
+          "This session was removed. Select another session."
         ) : activeMessages.length === 0 ? (
           `No messages yet for ${selectedSessionId}.`
         ) : (
@@ -81,15 +114,15 @@ function Chatbox({ selectedSessionId }) {
             }
           }}
           placeholder={
-            selectedSessionId
+            hasSelectedSession
               ? `Type a message for ${selectedSessionId}...`
-              : "Select a session first..."
+              : "Select a valid session first..."
           }
-          disabled={!selectedSessionId}
+          disabled={!hasSelectedSession}
           rows={6}
           className="min-h-32 max-h-72 min-w-[320px] flex-1 resize rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
         />
-        <Button type="button" onClick={handleSend} disabled={!selectedSessionId}>
+        <Button type="button" onClick={handleSend} disabled={!hasSelectedSession}>
           Send
         </Button>
       </div>
