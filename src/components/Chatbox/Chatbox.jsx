@@ -132,7 +132,7 @@ function Chatbox({ selectedSessionId }) {
         ) : activeMessages.length === 0 ? (
           `No messages yet for ${selectedSessionId}.`
         ) : (
-          <div className="flex min-h-full flex-col justify-end gap-2">
+          <div className="flex min-h-full flex-col justify-end gap-3">
             {activeMessages.map((item) => (
               <div
                 key={item.id}
@@ -141,7 +141,7 @@ function Chatbox({ selectedSessionId }) {
                 }`}
               >
                 {item.role === "assistant" ? (
-                  <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                  <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     <AvatarPrimitive.Avatar.Image
                       className="aspect-square h-full w-full"
                       src=""
@@ -152,13 +152,11 @@ function Chatbox({ selectedSessionId }) {
                     </AvatarPrimitive.Avatar.Fallback>
                   </AvatarPrimitive.Avatar.Root>
                 ) : null}
-                <Card className={`w-fit ${item.role === "user" ? "bg-muted" : "bg-card"}`}>
-                  <CardContent className={`px-3 py-2 text-foreground ${item.role === "user" ? "text-right" : "text-left"}`}>
+                  <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
                     {item.content}
-                  </CardContent>
-                </Card>
+                  </div>
                 {item.role === "user" ? (
-                  <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                  <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     <AvatarPrimitive.Avatar.Image
                       className="aspect-square h-full w-full"
                       src=""
@@ -172,15 +170,15 @@ function Chatbox({ selectedSessionId }) {
               </div>
             ))}
             {isLoading ? (
-              <div className="flex items-end gap-2">
-                <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+              <div className="flex items-center gap-2">
+                <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                   <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
                     AI
                   </AvatarPrimitive.Avatar.Fallback>
                 </AvatarPrimitive.Avatar.Root>
                 <Button variant="outline" disabled>
                   <Spinner data-icon="inline-start" />
-                  Generating
+                  Thinking
                 </Button>
               </div>
             ) : null}
