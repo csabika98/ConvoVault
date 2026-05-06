@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useSessions } from "@/context/SessionsContext";
 import { getAiReply } from "@/services/aiRouting";
 import { Spinner } from "@/components/ui/spinner"
-import { Input } from "@/components/ui/input"
 import { SendIcon } from "lucide-react"
 
 function Chatbox({ selectedSessionId }) {
