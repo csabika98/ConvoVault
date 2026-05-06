@@ -32,8 +32,7 @@ function AIProfile() {
             Your friendly AI for coding and problem‑solving.
           </EmptyDescription>
         </EmptyHeader>
-
-        <EmptyContent className="flex flex-col gap-4 pt-4 text-sm text-muted-foreground">
+        <EmptyContent className="flex flex-col gap-4 text-sm text-muted-foreground">
           <p>
             <strong>Personality:</strong> {personality}
           </p>
