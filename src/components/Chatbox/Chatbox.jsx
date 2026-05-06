@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as AvatarPrimitive from "radix-ui";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useSessions } from "@/context/SessionsContext";
 import { getAiReply } from "@/services/aiRouting";
 import { Spinner } from "@/components/ui/spinner"
@@ -101,13 +100,14 @@ function Chatbox({ selectedSessionId }) {
         ],
       }));
     } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
       setMessagesBySession((prev) => ({
         ...prev,
         [currentSessionKey]: [
           ...(prev[currentSessionKey] ?? []),
           {
             id: crypto.randomUUID(),
-            content: "AI request failed. Check your OpenRouter key/config.",
+            content: `AI request failed: ${detail}`,
             role: "assistant",
           },
         ],
