@@ -11,7 +11,9 @@ export function ProfileProvider({ children }) {
   const [mode, setMode] = useState(MODES.HUMAN_VS_AI);
 
   const setAiVsAi = () => setMode(MODES.AI_VS_AI);
-  const setHumanVsAi = () => setMode(MODES.HUMAN_VS_AI);
+  const setHumanVsAi = () => {
+    setMode(MODES.HUMAN_VS_AI);
+  } 
 
   return (
     <ProfileContext.Provider

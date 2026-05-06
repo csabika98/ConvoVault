@@ -207,7 +207,7 @@ function Chatbox({ selectedSessionId }) {
           className="h-20 min-h-10 max-h-72 min-w-[320px] flex-1 resize rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
         />
         <Button size="icon" type="button" onClick={() => void handleSend()} disabled={!hasSelectedSession || isLoading}>
-          {isLoading ? <Spinner /> : <SendIcon className="h-4 w-4" />}
+          {isLoading ? <Spinner /> : <SendIcon />}
         </Button>
       </div>
     </div>

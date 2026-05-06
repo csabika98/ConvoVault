@@ -1,24 +1,19 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import AIProfile from "@/components/Profile/AIProfile";
 import CharacterList from "@/components/Profile/CharacterList";
+import { useProfile } from "@/context/ProfileContext";
 
 function Profile() {
+  const { isAiVsAi, isHumanVsAi, setHumanVsAi } = useProfile();
 
   return (
-    <>
-      <Tabs defaultValue="HUMAN_VS_AI">
-      <TabsList>
-        <TabsTrigger value="HUMAN_VS_AI">Human vs. AI</TabsTrigger>
-        <TabsTrigger value="AI_VS_AI">AI vs. AI</TabsTrigger>
-      </TabsList>
-      <TabsContent value="HUMAN_VS_AI">
-        <AIProfile />
-      </TabsContent>
-      <TabsContent value="AI_VS_AI">
-        <CharacterList />
-      </TabsContent>
-    </Tabs>
-    </>
+    <div>
+      <Button onClick={setHumanVsAi}>setHumanVsAi</Button>
+      <div className="text-sm text-muted-foreground mb-2">
+        { isAiVsAi ? <CharacterList /> : null }
+        { isHumanVsAi ? <AIProfile /> : null }
+      </div>
+    </div>
   )
 }
 
