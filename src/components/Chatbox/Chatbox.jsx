@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as AvatarPrimitive from "radix-ui";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useSessions } from "@/context/SessionsContext";
 import { getAiReply } from "@/services/aiRouting";
+import { Spinner } from "@/components/ui/spinner"
 
 function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
@@ -100,13 +100,14 @@ function Chatbox({ selectedSessionId }) {
         ],
       }));
     } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
       setMessagesBySession((prev) => ({
         ...prev,
         [currentSessionKey]: [
           ...(prev[currentSessionKey] ?? []),
           {
             id: crypto.randomUUID(),
-            content: "AI request failed. Check your OpenRouter key/config.",
+            content: `AI request failed: ${detail}`,
             role: "assistant",
           },
         ],
@@ -122,7 +123,7 @@ function Chatbox({ selectedSessionId }) {
     <div className="flex h-full min-h-0 min-w-0 flex-col">
       <div
         ref={messagesContainerRef}
-        className="min-h-0 flex-1 overflow-auto rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground"
+        className="min-h-0 flex-1 overflow-auto rounded-md p-4 text-sm text-muted-foreground scroll-smooth"
       >
         {!selectedSessionId ? (
           "Select a session from History to view messages."
@@ -131,7 +132,7 @@ function Chatbox({ selectedSessionId }) {
         ) : activeMessages.length === 0 ? (
           `No messages yet for ${selectedSessionId}.`
         ) : (
-          <div className="flex min-h-full flex-col justify-end gap-2">
+          <div className="flex min-h-full flex-col justify-end gap-3">
             {activeMessages.map((item) => (
               <div
                 key={item.id}
@@ -140,7 +141,7 @@ function Chatbox({ selectedSessionId }) {
                 }`}
               >
                 {item.role === "assistant" ? (
-                  <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                  <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     <AvatarPrimitive.Avatar.Image
                       className="aspect-square h-full w-full"
                       src=""
@@ -151,13 +152,11 @@ function Chatbox({ selectedSessionId }) {
                     </AvatarPrimitive.Avatar.Fallback>
                   </AvatarPrimitive.Avatar.Root>
                 ) : null}
-                <Card className={`w-fit ${item.role === "user" ? "bg-muted" : "bg-card"}`}>
-                  <CardContent className={`px-3 py-2 text-foreground ${item.role === "user" ? "text-right" : "text-left"}`}>
+                  <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
                     {item.content}
-                  </CardContent>
-                </Card>
+                  </div>
                 {item.role === "user" ? (
-                  <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                  <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     <AvatarPrimitive.Avatar.Image
                       className="aspect-square h-full w-full"
                       src=""
@@ -171,15 +170,16 @@ function Chatbox({ selectedSessionId }) {
               </div>
             ))}
             {isLoading ? (
-              <div className="flex items-end gap-2">
-                <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
+              <div className="flex items-center gap-2">
+                <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
                   <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
                     AI
                   </AvatarPrimitive.Avatar.Fallback>
                 </AvatarPrimitive.Avatar.Root>
-                <Card>
-                  <CardContent className="px-3 py-2">Thinking...</CardContent>
-                </Card>
+                <Button variant="outline" disabled>
+                  <Spinner data-icon="inline-start" />
+                  Thinking
+                </Button>
               </div>
             ) : null}
           </div>

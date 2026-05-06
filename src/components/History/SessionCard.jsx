@@ -1,23 +1,28 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Item,
+  ItemContent,
+  ItemTitle,
+  ItemActions,
+} from "@/components/ui/item";
 
 function SessionCard({
-  title = "Card Title",
-  description = "This is the card description.",
+  title = "Session Title",
   counter = "1",
   sessionId,
   isActive = false,
   onSelect,
-  onDelete
+  onDelete,
 }) {
-
   return (
-    <Card
-      className={`relative group cursor-pointer transition-colors ${
-        isActive ? "ring-2 ring-ring" : ""
+    <Item
+      variant="muted"
+      className={`group flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border ${
+        isActive
+          ? "bg-primary/5 border-primary/30 text-foreground"
+          : "border-border"
       }`}
       onClick={() => onSelect(sessionId)}
       role="button"
@@ -29,32 +34,33 @@ function SessionCard({
         }
       }}
     >
-      {/* Top-right counter */}
-      <div className="absolute top-4 right-4 z-10">
-        <Badge variant="secondary" className="text-xs">#{counter}</Badge>
-      </div>
+      <Badge variant="outline" className="shrink-0 text-xs">
+        #{counter}
+      </Badge>
 
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
+      <ItemContent className="min-w-0 flex-1 p-0">
+        <ItemTitle className={`truncate font-medium ${
+          isActive ? "text-foreground" : "text-muted-foreground"
+        }`}>
+          {title}
+        </ItemTitle>
+      </ItemContent>
 
-      <Separator />
-
-      <CardContent className="pb-12 pt-0">
-        <CardDescription>{description}</CardDescription>
-      </CardContent>
-
-      {/* Bottom-right delete button - hidden until hover */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute bottom-4 right-4 h-8 w-8 rounded-full p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
-        onClick={onDelete}
-      >
-        <Trash2 className="h-4 w-4" />
-        <span className="sr-only">Delete</span>
-      </Button>
-    </Card>
+      <ItemActions className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full p-0 hover:bg-destructive/10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(sessionId);
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Delete</span>
+        </Button>
+      </ItemActions>
+    </Item>
   );
 }
 

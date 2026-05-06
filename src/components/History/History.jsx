@@ -12,7 +12,6 @@ function History({ selectedSessionId, onSessionSelect }) {
 
     const newSessionId = addSession({
       title: `Session ${sessions.length + 1}`,
-      description: `Description for session ${sessions.length + 1}`,
     });
 
     onSessionSelect(newSessionId);
@@ -41,9 +40,17 @@ function History({ selectedSessionId, onSessionSelect }) {
             />
           ))}
         </div>
-        <Button className="mt-6 rounded-full" onClick={handleAddSession} disabled={sessionsAreFull}>
-          {sessionsAreFull ? "Max 5 sessions" : <Plus />}
-        </Button>
+        <div className="mt-6 flex justify-end">
+          <Button
+            size={sessionsAreFull ? "" : "icon-sm" }
+            variant="secondary"
+            className="rounded-full"
+            onClick={handleAddSession}
+            disabled={sessionsAreFull}
+          >
+            { sessionsAreFull ? "Max 5 sessions" : <Plus /> }
+          </Button>
+        </div>
       </div>
     </>
   )
