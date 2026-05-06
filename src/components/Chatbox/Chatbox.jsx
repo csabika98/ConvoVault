@@ -123,7 +123,7 @@ function Chatbox({ selectedSessionId }) {
     <div className="flex h-full min-h-0 min-w-0 flex-col">
       <div
         ref={messagesContainerRef}
-        className="min-h-0 flex-1 overflow-auto rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground"
+        className="min-h-0 flex-1 overflow-auto rounded-md p-4 text-sm text-muted-foreground scroll-smooth"
       >
         {!selectedSessionId ? (
           "Select a session from History to view messages."
