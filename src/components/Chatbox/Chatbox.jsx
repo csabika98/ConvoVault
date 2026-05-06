@@ -9,6 +9,7 @@ function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
   const [message, setMessage] = useState("");
   const [messagesBySession, setMessagesBySession] = useState({});
+  const [modeBySession, setModeBySession] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const inFlightRef = useRef(false);
   const messagesContainerRef = useRef(null);
@@ -19,6 +20,7 @@ function Chatbox({ selectedSessionId }) {
   const sessionIdsRef = useRef(sessionIds);
   const selectedSessionKey = selectedSessionId ? String(selectedSessionId) : "";
   const hasSelectedSession = Boolean(selectedSessionKey && sessionIds.has(selectedSessionKey));
+  const activeMode = modeBySession[selectedSessionKey] ?? "ai-vs-human";
 
   const activeMessages = useMemo(() => {
     if (!hasSelectedSession) return [];
@@ -37,6 +39,21 @@ function Chatbox({ selectedSessionId }) {
       for (const [sessionId, messages] of Object.entries(prev)) {
         if (sessionIds.has(sessionId)) {
           next[sessionId] = messages;
+        } else {
+          changed = true;
+        }
+      }
+
+      return changed ? next : prev;
+    });
+
+    setModeBySession((prev) => {
+      const next = {};
+      let changed = false;
+
+      for (const [sessionId, mode] of Object.entries(prev)) {
+        if (sessionIds.has(sessionId)) {
+          next[sessionId] = mode;
         } else {
           changed = true;
         }
@@ -85,18 +102,20 @@ function Chatbox({ selectedSessionId }) {
         { role: "user", content: text },
       ];
 
-      const ai = await getAiReply(baseConversation);
+      const ai = await getAiReply(baseConversation, { mode: activeMode });
       if (!sessionIdsRef.current.has(currentSessionKey)) return;
+
+      const assistantChunks = splitIntoChatBubbles(ai.content, 2);
       setMessagesBySession((prev) => ({
         ...prev,
         [currentSessionKey]: [
           ...(prev[currentSessionKey] ?? []),
-          {
+          ...assistantChunks.map((chunk) => ({
             id: crypto.randomUUID(),
-            content: ai.content,
+            content: chunk,
             role: "assistant",
             reasoningDetails: ai.reasoningDetails,
-          },
+          })),
         ],
       }));
     } catch (error) {
@@ -121,6 +140,32 @@ function Chatbox({ selectedSessionId }) {
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
+      {hasSelectedSession ? (
+        <div className="mb-3 flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={activeMode === "ai-vs-human" ? "default" : "outline"}
+            onClick={() =>
+              setModeBySession((prev) => ({ ...prev, [selectedSessionKey]: "ai-vs-human" }))
+            }
+            disabled={isLoading}
+          >
+            AI vs Human
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={activeMode === "ai-vs-ai" ? "default" : "outline"}
+            onClick={() =>
+              setModeBySession((prev) => ({ ...prev, [selectedSessionKey]: "ai-vs-ai" }))
+            }
+            disabled={isLoading}
+          >
+            AI vs AI
+          </Button>
+        </div>
+      ) : null}
       <div
         ref={messagesContainerRef}
         className="min-h-0 flex-1 overflow-auto rounded-md p-4 text-sm text-muted-foreground scroll-smooth"
@@ -210,6 +255,34 @@ function Chatbox({ selectedSessionId }) {
       </div>
     </div>
   );
+}
+
+function splitIntoChatBubbles(text, maxSentencesPerBubble) {
+  const raw = String(text ?? "").trim();
+  if (!raw) return [];
+
+  const paragraphs = raw
+    .split(/\n{2,}/g)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const bubbles = [];
+  for (const p of paragraphs) {
+    const normalized = p.replace(/\s+/g, " ").trim();
+    const sentences = normalized.split(/(?<=[.!?])\s+/g).filter(Boolean);
+
+    if (sentences.length <= maxSentencesPerBubble) {
+      bubbles.push(normalized);
+      continue;
+    }
+
+    for (let i = 0; i < sentences.length; i += maxSentencesPerBubble) {
+      const chunk = sentences.slice(i, i + maxSentencesPerBubble).join(" ").trim();
+      if (chunk) bubbles.push(chunk);
+    }
+  }
+
+  return bubbles.length > 0 ? bubbles : [raw];
 }
 
 export default Chatbox;
