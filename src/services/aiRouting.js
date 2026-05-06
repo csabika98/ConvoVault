@@ -1,6 +1,8 @@
+import { SYSTEM_PROMPT_AI_VS_AI, SYSTEM_PROMPT_AI_VS_HUMAN } from "@/config/system_prompt";
+
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-export async function getAiReply(conversation) {
+export async function getAiReply(conversation, options = {}) {
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error("Missing VITE_OPENROUTER_API_KEY in your environment.");
@@ -22,7 +24,7 @@ export async function getAiReply(conversation) {
     },
     body: JSON.stringify({
       model,
-      messages: conversation,
+      messages: withSystemPrompt(conversation, options),
       reasoning: { enabled: true },
     }),
   });
@@ -47,6 +49,20 @@ export async function getAiReply(conversation) {
     content: text || "I could not generate a response.",
     reasoningDetails: message?.reasoning_details,
   };
+}
+
+function withSystemPrompt(conversation, options) {
+  const safe = Array.isArray(conversation) ? conversation : [];
+  const hasSystem = safe.some((m) => m && typeof m === "object" && m.role === "system");
+  if (hasSystem) return safe;
+
+  const mode = options?.mode === "ai-vs-ai" ? "ai-vs-ai" : "ai-vs-human";
+  const systemPrompt = mode === "ai-vs-ai" ? SYSTEM_PROMPT_AI_VS_AI : SYSTEM_PROMPT_AI_VS_HUMAN;
+
+  return [
+    { role: "system", content: systemPrompt },
+    ...safe,
+  ];
 }
 
 function normalizeContent(content) {
