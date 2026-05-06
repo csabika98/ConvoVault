@@ -1,5 +1,4 @@
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "openai/gpt-oss-120b:free";
 
 export async function getAiReply(conversation) {
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -7,7 +6,13 @@ export async function getAiReply(conversation) {
     throw new Error("Missing VITE_OPENROUTER_API_KEY in your environment.");
   }
 
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || DEFAULT_MODEL;
+  const model =
+    import.meta.env.VITE_OPENROUTER_MODEL || import.meta.env.VITE_OPENROUTER_MODEL_DEFAULT;
+  if (!model) {
+    throw new Error(
+      "Missing model configuration. Set VITE_OPENROUTER_MODEL or VITE_OPENROUTER_MODEL_DEFAULT in your environment."
+    );
+  }
 
   const response = await fetch(OPENROUTER_URL, {
     method: "POST",
