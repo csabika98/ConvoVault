@@ -9,10 +9,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { useState } from "react";
 
 function AIProfile() {
-  const personality =
-    "Curious, pragmatic, and helpful. Enjoys explaining complex things simply and writing clean, readable code. Always tries to ask clarifying questions before jumping to solutions.";
+  const [name, setName] = useState('John Doe');
+  const [introduction, SetIntroduction] = useState('Your friendly AI for coding and problem‑solving.');
+  const [personality, setPersonality] = useState('Curious, pragmatic, and helpful. Enjoys explaining complex things simply and writing clean, readable code. Always tries to ask clarifying questions before jumping to solutions.');
  
   return (
     <>
@@ -27,10 +29,8 @@ function AIProfile() {
             </Avatar>
           </EmptyMedia>
 
-          <EmptyTitle>Assistant Profile</EmptyTitle>
-          <EmptyDescription>
-            Your friendly AI for coding and problem‑solving.
-          </EmptyDescription>
+          <EmptyTitle>{name}</EmptyTitle>
+          <EmptyDescription>{introduction}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex flex-col gap-4 text-sm text-muted-foreground">
           <p>
