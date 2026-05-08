@@ -4,13 +4,16 @@ import './index.css'
 import App from './App.jsx'
 import { SessionsProvider } from './context/sessions/SessionsProvider'
 import { ProfileProvider } from './context/profile/ProfileProvider'
+import { ThemeProvider } from './components/Theme/theme-provider'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <SessionsProvider>
-      <ProfileProvider>
-        <App />
-      </ProfileProvider>
-    </SessionsProvider>
+    <ThemeProvider defaultTheme="system" storageKey="convovault-theme">
+      <SessionsProvider>
+        <ProfileProvider>
+          <App />
+        </ProfileProvider>
+      </SessionsProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

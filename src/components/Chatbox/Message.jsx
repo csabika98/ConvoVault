@@ -1,6 +1,6 @@
 import * as AvatarPrimitive from "radix-ui";
 
-function Message({ role, content, assistantAvatar }) {
+function Message({ role, content, assistantAvatar, userAvatarUrl }) {
   const isUser = role === "user";
 
   return (
@@ -9,12 +9,12 @@ function Message({ role, content, assistantAvatar }) {
         <AssistantAvatar profile={assistantAvatar} />
       ) : null}
 
-      <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
+      <div className="rounded-xl bg-muted p-3 text-sm text-foreground">
         {content}
       </div>
 
       {isUser ? (
-        <UserAvatar />
+        <UserAvatar avatarUrl={userAvatarUrl} />
       ) : null}
     </div>
   );
@@ -37,9 +37,14 @@ export function AssistantAvatar({ profile }) {
   );
 }
 
-function UserAvatar() {
+function UserAvatar({ avatarUrl }) {
   return (
     <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+      <AvatarPrimitive.Avatar.Image
+        className="h-full w-full object-cover"
+        src={avatarUrl || undefined}
+        alt="Your avatar"
+      />
       <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
         HU
       </AvatarPrimitive.Avatar.Fallback>

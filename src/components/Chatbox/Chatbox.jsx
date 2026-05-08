@@ -12,6 +12,7 @@ function Chatbox({ selectedSessionId }) {
   const {
     assistantProfile,
     isGeneratingProfile,
+    userAvatarUrl,
     getModeForSession,
     setAiVsAiForSession,
     setHumanVsAiForSession,
@@ -177,6 +178,7 @@ function Chatbox({ selectedSessionId }) {
                 role={item.role}
                 content={item.content}
                 assistantAvatar={item.assistantAvatar}
+                userAvatarUrl={userAvatarUrl}
               />
             ))}
             {isLoading ? (
