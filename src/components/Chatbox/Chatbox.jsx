@@ -32,6 +32,7 @@ function Chatbox({ selectedSessionId }) {
   const hasSelectedSession = Boolean(
     selectedSessionKey && sessionIds.has(selectedSessionKey)
   );
+  const hasAssistantProfile = Boolean(assistantProfile);
   const activeMode = getModeForSession(selectedSessionKey);
 
   const activeMessages = useMemo(() => {
@@ -54,7 +55,7 @@ function Chatbox({ selectedSessionId }) {
 
   async function handleSend() {
     const text = message.trim();
-    if (!text || !hasSelectedSession || inFlightRef.current) return;
+    if (!text || !hasSelectedSession || !hasAssistantProfile || inFlightRef.current) return;
 
     const currentSessionKey = selectedSessionKey;
     const userMessage = { id: crypto.randomUUID(), content: text, role: "user" };
@@ -207,7 +208,7 @@ function Chatbox({ selectedSessionId }) {
               ? "Type a message..."
               : "Select a valid session first..."
           }
-          disabled={!hasSelectedSession || isLoading}
+          disabled={!hasSelectedSession || !hasAssistantProfile || isLoading}
           rows={6}
           className="h-20 min-h-10 max-h-72 min-w-[320px] flex-1 resize rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
         />
@@ -215,7 +216,7 @@ function Chatbox({ selectedSessionId }) {
           size="icon"
           type="button"
           onClick={() => void handleSend()}
-          disabled={!hasSelectedSession || isLoading}
+          disabled={!hasSelectedSession || !hasAssistantProfile || isLoading}
         >
           {isLoading ? <Spinner /> : <SendIcon />}
         </Button>
