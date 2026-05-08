@@ -6,7 +6,7 @@ import {
 import { useState } from "react";
 import History from "./components/History/History";
 import Chatbox from "./components/Chatbox/Chatbox";
-
+import Profile from "@/components/Profile/Profile";
 
 function App() {
   const [selectedSessionId, setSelectedSessionId] = useState("");
@@ -34,8 +34,8 @@ function App() {
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={20}>
-          <div className="flex h-full min-h-0 min-w-0 flex-col items-center justify-center p-6">
-            <span className="font-semibold">Profile</span>
+          <div className="flex h-full min-h-0 min-w-0 flex-col items-center p-6">
+            <Profile />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
