@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { buildCharacterProfilePrompt } from "@/config/systemPrompt";
-import { useProfile } from "@/context/useProfile";
+import { useProfile } from "@/context/profile/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -62,27 +62,25 @@ function AIProfile() {
             .filter(Boolean)
         )
       );
-      const prompt = buildCharacterProfilePrompt(exclusions);
-      const reply = await getAiReply([{ role: "user", content: prompt }], {
-        mode: "ai-vs-human",
-      });
-      let nextProfile = parseCharacterProfile(reply.content);
-      if (!nextProfile) return;
-      if (containsName(exclusions, nextProfile.name)) {
-        const retryPrompt = buildCharacterProfilePrompt([
-          ...exclusions,
-          nextProfile.name,
-        ]);
-        const retryReply = await getAiReply(
-          [{ role: "user", content: retryPrompt }],
-          { mode: "ai-vs-human" }
-        );
-        const retryProfile = parseCharacterProfile(retryReply.content);
-        if (!retryProfile || containsName([...exclusions, nextProfile.name], retryProfile.name)) {
-          return;
+      const attemptedNames = [...exclusions];
+      let nextProfile = null;
+      const maxAttempts = 4;
+
+      for (let i = 0; i < maxAttempts; i += 1) {
+        const prompt = buildCharacterProfilePrompt(attemptedNames);
+        const reply = await getAiReply([{ role: "user", content: prompt }], {
+          mode: "ai-vs-human",
+        });
+        const candidate = parseCharacterProfile(reply.content);
+        if (!candidate) continue;
+        if (containsName(attemptedNames, candidate.name)) {
+          attemptedNames.push(candidate.name);
+          continue;
         }
-        nextProfile = retryProfile;
+        nextProfile = candidate;
+        break;
       }
+      if (!nextProfile) return;
       setAssistantProfile(nextProfile);
       rememberPersonName(nextProfile.name);
       void hydratePortrait(nextProfile);
@@ -187,22 +185,36 @@ function parseCharacterProfile(raw) {
 }
 
 async function fetchWikipediaPortraitUrl(title) {
-  const safeTitle = encodeURIComponent(String(title ?? "").trim());
+  const rawTitle = String(title ?? "").trim();
+  const safeTitle = encodeURIComponent(rawTitle);
   if (!safeTitle) return null;
-  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&piprop=thumbnail&pithumbsize=512&redirects=1&format=json&titles=${safeTitle}&origin=*`;
+
   try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const data = await response.json();
-    const pages = data?.query?.pages;
-    if (!pages || typeof pages !== "object") return null;
-    for (const page of Object.values(pages)) {
-      const source = page?.thumbnail?.source;
-      if (typeof source === "string" && source) return source;
+    const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${safeTitle}`;
+    const summaryResponse = await fetch(summaryUrl);
+    if (summaryResponse.ok) {
+      const summaryData = await summaryResponse.json();
+      const fromSummary =
+        summaryData?.thumbnail?.source || summaryData?.originalimage?.source;
+      if (typeof fromSummary === "string" && fromSummary) return fromSummary;
     }
-    return null;
+
+    const pageImageUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&piprop=thumbnail&pithumbsize=512&redirects=1&format=json&titles=${safeTitle}&origin=*`;
+    const response = await fetch(pageImageUrl);
+    if (response.ok) {
+      const data = await response.json();
+      const pages = data?.query?.pages;
+      if (pages && typeof pages === "object") {
+        for (const page of Object.values(pages)) {
+          const source = page?.thumbnail?.source;
+          if (typeof source === "string" && source) return source;
+        }
+      }
+    }
+
+    return buildGeneratedAvatarUrl(rawTitle);
   } catch {
-    return null;
+    return buildGeneratedAvatarUrl(rawTitle);
   }
 }
 
@@ -212,4 +224,9 @@ function containsName(list, value) {
   return list.some(
     (item) => String(item ?? "").trim().toLowerCase() === normalizedValue
   );
+}
+
+function buildGeneratedAvatarUrl(seed) {
+  const safeSeed = encodeURIComponent(String(seed ?? "").trim() || "famous-person");
+  return `https://api.dicebear.com/9.x/personas/svg?seed=${safeSeed}&backgroundType=gradientLinear`;
 }

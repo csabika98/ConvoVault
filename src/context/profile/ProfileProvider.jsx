@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ProfileContext } from "@/context/profileContext";
+import { ProfileContext } from "@/context/profile/ProfileContext";
 
 export function ProfileProvider({ children }) {
   const [modeBySession, setModeBySession] = useState({});

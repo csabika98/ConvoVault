@@ -2,7 +2,7 @@ import SessionCard from "./SessionCard";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useSessions } from "@/context/useSessions";
+import { useSessions } from "@/context/sessions/useSessions";
 
 function History({ selectedSessionId, onSessionSelect }) {
   const { sessions, addSession, deleteSession, sessionsAreFull } = useSessions();

@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import History from "./components/History/History";
 import Chatbox from "./components/Chatbox/Chatbox";
 import Profile from "@/components/Profile/Profile";
-import { useSessions } from "@/context/useSessions";
+import { useSessions } from "@/context/sessions/useSessions";
 
 function App() {
   const [selectedSessionId, setSelectedSessionId] = useState("");

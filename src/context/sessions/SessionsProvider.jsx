@@ -1,5 +1,5 @@
-import {useState} from "react";
-import { SessionContext } from "@/context/sessionContext.js";
+import { useState } from "react";
+import { SessionContext } from "@/context/sessions/SessionContext";
 
 const MAX_SESSIONS = 5;
 
@@ -28,7 +28,12 @@ export function SessionsProvider({ children }) {
 
   return (
     <SessionContext.Provider
-      value={{ sessions, addSession, deleteSession, sessionsAreFull: sessions.length >= MAX_SESSIONS }}
+      value={{
+        sessions,
+        addSession,
+        deleteSession,
+        sessionsAreFull: sessions.length >= MAX_SESSIONS,
+      }}
     >
       {children}
     </SessionContext.Provider>
