@@ -18,8 +18,6 @@ function AIProfile() {
  
   return (
     <>
-      <h1>Human vs. AI</h1>
-      <h3>from: AIProile.jsx</h3>
       <Empty className="max-w-sm mx-auto p-6">
         <EmptyHeader>
           <EmptyMedia>

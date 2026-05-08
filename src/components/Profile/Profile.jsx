@@ -1,20 +1,19 @@
-import { Button } from "@/components/ui/button"
 import AIProfile from "@/components/Profile/AIProfile";
 import CharacterList from "@/components/Profile/CharacterList";
 import { useProfile } from "@/context/ProfileContext";
 
-function Profile() {
-  const { isAiVsAi, isHumanVsAi, setHumanVsAi } = useProfile();
+function Profile({ selectedSessionId }) {
+  const { getModeForSession } = useProfile();
+  const activeMode = getModeForSession(selectedSessionId);
 
   return (
     <div>
-      <Button onClick={setHumanVsAi}>setHumanVsAi</Button>
       <div className="text-sm text-muted-foreground mb-2">
-        { isAiVsAi ? <CharacterList /> : null }
-        { isHumanVsAi ? <AIProfile /> : null }
+        {activeMode === "ai-vs-ai" ? <CharacterList /> : null}
+        {activeMode === "ai-vs-human" ? <AIProfile /> : null}
       </div>
     </div>
-  )
+  );
 }
 
 export default Profile;
