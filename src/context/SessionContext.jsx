@@ -1,8 +1,7 @@
-import { createContext, useContext, useState } from "react";
+import {useState} from "react";
+import { SessionContext } from "@/context/sessionContext.js";
 
 const MAX_SESSIONS = 5;
-
-const SessionsContext = createContext(null);
 
 export function SessionsProvider({ children }) {
   const [sessions, setSessions] = useState([{ id: 1, title: "Session 1" }]);
@@ -28,20 +27,10 @@ export function SessionsProvider({ children }) {
   };
 
   return (
-    <SessionsContext.Provider
+    <SessionContext.Provider
       value={{ sessions, addSession, deleteSession, sessionsAreFull: sessions.length >= MAX_SESSIONS }}
     >
       {children}
-    </SessionsContext.Provider>
+    </SessionContext.Provider>
   );
-}
-
-export function useSessions() {
-  const context = useContext(SessionsContext);
-  if (!context) {
-    throw new Error(
-      "useSessions must be used within SessionsProvider"
-    );
-  }
-  return context;
 }

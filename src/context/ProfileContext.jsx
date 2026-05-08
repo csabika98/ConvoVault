@@ -1,6 +1,5 @@
-import { createContext, useContext, useState } from "react";
-
-const ProfileContext = createContext(null);
+import { useState } from "react";
+import { ProfileContext } from "@/context/profileContext";
 
 export function ProfileProvider({ children }) {
   const [modeBySession, setModeBySession] = useState({});
@@ -57,12 +56,4 @@ export function ProfileProvider({ children }) {
       {children}
     </ProfileContext.Provider>
   );
-}
-
-export function useProfile() {
-  const context = useContext(ProfileContext);
-  if (!context) {
-    throw new Error("useProfile must be used within ProfileProvider");
-  }
-  return context;
 }

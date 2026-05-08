@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { buildCharacterProfilePrompt } from "@/config/systemPrompt";
-import { useProfile } from "@/context/ProfileContext";
+import { useProfile } from "@/context/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";

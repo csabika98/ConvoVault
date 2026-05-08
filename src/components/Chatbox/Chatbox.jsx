@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as AvatarPrimitive from "radix-ui";
 import { Button } from "@/components/ui/button";
-import { useSessions } from "@/context/SessionsContext";
-import { useProfile } from "@/context/ProfileContext";
+import { useSessions } from "@/context/useSessions";
+import { useProfile } from "@/context/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { Spinner } from "@/components/ui/spinner";
 import { SendIcon } from "lucide-react";

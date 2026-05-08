@@ -1,6 +1,6 @@
 import AIProfile from "@/components/Profile/AIProfile";
 import CharacterList from "@/components/Profile/CharacterList";
-import { useProfile } from "@/context/ProfileContext";
+import { useProfile } from "@/context/useProfile";
 
 function Profile({ selectedSessionId }) {
   const { getModeForSession } = useProfile();

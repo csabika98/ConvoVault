@@ -3,25 +3,19 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import History from "./components/History/History";
 import Chatbox from "./components/Chatbox/Chatbox";
 import Profile from "@/components/Profile/Profile";
-import { useSessions } from "@/context/SessionsContext";
+import { useSessions } from "@/context/useSessions";
 
 function App() {
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const { sessions } = useSessions();
-
-  useEffect(() => {
-    if (sessions.length === 0) {
-      setSelectedSessionId("");
-      return;
-    }
+  const effectiveSelectedSessionId = useMemo(() => {
+    if (sessions.length === 0) return "";
     const selectedExists = sessions.some((session) => session.id === selectedSessionId);
-    if (!selectedExists) {
-      setSelectedSessionId(sessions[0].id);
-    }
+    return selectedExists ? selectedSessionId : sessions[0].id;
   }, [selectedSessionId, sessions]);
 
   return (
@@ -34,7 +28,7 @@ function App() {
           <div className="flex h-full min-h-0 min-w-0 flex-col overflow-auto p-6">
             {/*<span className="font-semibold">Sidebar</span>*/}
             <History
-              selectedSessionId={selectedSessionId}
+              selectedSessionId={effectiveSelectedSessionId}
               onSessionSelect={setSelectedSessionId}
             />
           </div>
@@ -42,13 +36,13 @@ function App() {
         <ResizableHandle />
         <ResizablePanel defaultSize={60}>
           <div className="flex h-full min-h-0 min-w-0 flex-col p-6">
-            <Chatbox selectedSessionId={selectedSessionId} />
+            <Chatbox selectedSessionId={effectiveSelectedSessionId} />
           </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={20}>
           <div className="flex h-full min-h-0 min-w-0 flex-col items-center p-6">
-            <Profile selectedSessionId={selectedSessionId} />
+            <Profile selectedSessionId={effectiveSelectedSessionId} />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
