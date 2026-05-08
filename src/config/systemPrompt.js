@@ -24,6 +24,32 @@ Modes:
 - Default is AI vs Human: the user is one participant and the other 3–4 participants are the chosen figures.
 - AI vs AI: simulate all participants without requiring user replies. Write in English and simulate personas based on the provided context.`;
 
+export function buildAiVsAiSystemPrompt(characters = []) {
+  const participants = Array.isArray(characters)
+    ? characters
+        .map((character) => String(character?.name ?? "").trim())
+        .filter(Boolean)
+        .slice(0, 5)
+    : [];
+
+  if (participants.length === 0) return SYSTEM_PROMPT_AI_VS_AI;
+
+  return [
+    SYSTEM_PROMPT_AI_VS_AI,
+    "",
+    "Active simulation participants:",
+    ...participants.map((name) => `- ${name}`),
+    "",
+    "For each request, return STRICT JSON only with these string fields:",
+    "- speaker: exactly one active participant name",
+    "- message: one short chat message in that participant's voice",
+    "Rules:",
+    "- choose a speaker who naturally continues the conversation",
+    "- do not invent speakers outside the active participants",
+    "- no markdown, no backticks, no extra keys",
+  ].join("\n");
+}
+
 export function buildCharacterProfilePrompt(excludedNames = []) {
   const blocked = Array.isArray(excludedNames)
     ? excludedNames

@@ -10,6 +10,7 @@ function CharacterList() {
     addCharacter,
     deleteCharacter,
     updateCharacterName,
+    startSimulation,
     charactersAreFull,
   } = useCharacters();
   const [selectedId, setSelectedId] = useState(null);
@@ -40,6 +41,13 @@ function CharacterList() {
     updateCharacterName(charId, newName);
   };
 
+  const handleStartSimulation = () => {
+    void startSimulation();
+  };
+
+  const canStartSimulation =
+    characters.filter((character) => String(character.name ?? "").trim()).length >= 2;
+
   return (
     <>
       <div className="flex w-full min-w-0 flex-col gap-1 p-2">
@@ -66,7 +74,9 @@ function CharacterList() {
         </Button>
       </div>
       <div className="mt-6 flex justify-end">
-        <Button>Start simulation!</Button>
+        <Button onClick={handleStartSimulation} disabled={!canStartSimulation}>
+          Start simulation
+        </Button>
       </div>
     </>
   );

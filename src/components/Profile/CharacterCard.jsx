@@ -22,14 +22,6 @@ function CharacterCard({
   const [editName, setEditName] = useState(name);
   const inputRef = useRef(null);
 
-  // Sync editName when name prop changes
-  useEffect(() => {
-    if (!isEditing) {
-      setEditName(name);
-    }
-  }, [name, isEditing]);
-
-  // Auto-focus input
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -43,6 +35,7 @@ function CharacterCard({
       }
       setIsEditing(false);
     } else {
+      setEditName(name);
       setIsEditing(true);
     }
   };
@@ -59,6 +52,7 @@ function CharacterCard({
       role="button"
       tabIndex={0}
       onKeyDown={(event) => {
+        if (event.target instanceof HTMLInputElement) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           onSelect?.();

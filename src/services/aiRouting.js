@@ -1,5 +1,5 @@
 import {
-  SYSTEM_PROMPT_AI_VS_AI,
+  buildAiVsAiSystemPrompt,
   SYSTEM_PROMPT_AI_VS_HUMAN,
   SYSTEM_PROMPT_AI_VS_HUMAN_PERSONA_SECTION,
 } from "@/config/systemPrompt.js";
@@ -60,7 +60,7 @@ function withSystemPrompt(conversation, options) {
   const mode = options?.mode === "ai-vs-ai" ? "ai-vs-ai" : "ai-vs-human";
   const systemPrompt =
     mode === "ai-vs-ai"
-      ? SYSTEM_PROMPT_AI_VS_AI
+      ? buildAiVsAiSystemPrompt(options?.simulationCharacters)
       : buildAiVsHumanSystemPrompt(options?.assistantProfile);
 
   return [

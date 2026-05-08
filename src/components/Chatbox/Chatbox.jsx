@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSessions } from "@/context/sessions/useSessions";
+import { useCharacters } from "@/context/characters/useCharacters";
 import { useProfile } from "@/context/profile/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { Spinner } from "@/components/ui/spinner";
@@ -9,6 +10,7 @@ import Message, { AssistantAvatar } from "@/components/Chatbox/Message";
 
 function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
+  const { simulationRequest } = useCharacters();
   const {
     assistantProfile,
     isGeneratingProfile,
@@ -21,7 +23,9 @@ function Chatbox({ selectedSessionId }) {
   const [message, setMessage] = useState("");
   const [messagesBySession, setMessagesBySession] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const inFlightRef = useRef(false);
+  const handledSimulationRequestIdRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
   const sessionIds = useMemo(
@@ -41,6 +45,13 @@ function Chatbox({ selectedSessionId }) {
     if (!hasSelectedSession) return [];
     return messagesBySession[selectedSessionKey] ?? [];
   }, [messagesBySession, selectedSessionKey, hasSelectedSession]);
+  const loadingAssistantAvatar =
+    activeMode === "ai-vs-ai" && simulationRequest?.participants?.[0]
+      ? createSimulationAvatarSnapshot(
+          simulationRequest.participants[0].name,
+          simulationRequest.participants
+        )
+      : assistantProfile;
 
   useEffect(() => {
     sessionIdsRef.current = sessionIds;
@@ -55,11 +66,111 @@ function Chatbox({ selectedSessionId }) {
     return () => cancelAnimationFrame(frame);
   }, [activeMessages.length, selectedSessionId]);
 
+  async function runSimulation(request, sessionKey) {
+    const participants = Array.isArray(request?.participants)
+      ? request.participants.filter((participant) =>
+          String(participant?.name ?? "").trim()
+        )
+      : [];
+    if (participants.length < 2 || inFlightRef.current) return;
+
+    const startedAt = Date.now();
+    const maxDurationMs = 60_000;
+    const maxTurns = 12;
+    const conversation = [];
+
+    inFlightRef.current = true;
+    setIsLoading(true);
+    setIsSimulationRunning(true);
+
+    try {
+      for (let turn = 0; turn < maxTurns; turn += 1) {
+        if (Date.now() - startedAt >= maxDurationMs) break;
+        if (!sessionIdsRef.current.has(sessionKey)) return;
+
+        const instruction =
+          turn === 0
+            ? "Start the AI-vs-AI simulation. Pick the first speaker and open with a concrete, conversational message."
+            : "Continue the AI-vs-AI simulation with the next natural chat message.";
+
+        const ai = await getAiReply(
+          [...conversation, { role: "user", content: instruction }],
+          {
+            mode: "ai-vs-ai",
+            simulationCharacters: participants,
+          }
+        );
+        if (!sessionIdsRef.current.has(sessionKey)) return;
+
+        const nextMessage = parseSimulationMessage(ai.content, participants, turn);
+        const assistantAvatar = createSimulationAvatarSnapshot(
+          nextMessage.speaker,
+          participants
+        );
+        const content = nextMessage.message;
+
+        setMessagesBySession((prev) => ({
+          ...prev,
+          [sessionKey]: [
+            ...(prev[sessionKey] ?? []),
+            {
+              id: crypto.randomUUID(),
+              content,
+              role: "assistant",
+              assistantAvatar,
+              reasoningDetails: turn === 0 ? ai.reasoningDetails : undefined,
+            },
+          ],
+        }));
+
+        conversation.push({
+          role: "assistant",
+          content: `${nextMessage.speaker}: ${nextMessage.message}`,
+        });
+
+        if (turn < maxTurns - 1 && Date.now() - startedAt < maxDurationMs) {
+          await wait(2_500);
+        }
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      setMessagesBySession((prev) => ({
+        ...prev,
+        [sessionKey]: [
+          ...(prev[sessionKey] ?? []),
+          {
+            id: crypto.randomUUID(),
+            content: `AI simulation failed: ${detail}`,
+            role: "assistant",
+          },
+        ],
+      }));
+      console.error(error);
+    } finally {
+      inFlightRef.current = false;
+      setIsLoading(false);
+      setIsSimulationRunning(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!simulationRequest) return;
+    if (handledSimulationRequestIdRef.current === simulationRequest.id) return;
+    if (!hasSelectedSession || activeMode !== "ai-vs-ai") return;
+
+    handledSimulationRequestIdRef.current = simulationRequest.id;
+    const timeout = setTimeout(() => {
+      void runSimulation(simulationRequest, selectedSessionKey);
+    }, 0);
+    return () => clearTimeout(timeout);
+  }, [activeMode, hasSelectedSession, selectedSessionKey, simulationRequest]);
+
   async function handleSend() {
     const text = message.trim();
     if (
       !text ||
       !hasSelectedSession ||
+      activeMode === "ai-vs-ai" ||
       !hasAssistantProfile ||
       isGeneratingProfile ||
       inFlightRef.current
@@ -169,7 +280,17 @@ function Chatbox({ selectedSessionId }) {
         ) : !hasSelectedSession ? (
           "This session was removed. Select another session."
         ) : activeMessages.length === 0 ? (
-          "No messages yet."
+          isLoading ? (
+            <div className="flex items-center gap-2">
+              <AssistantAvatar profile={loadingAssistantAvatar} />
+              <Button variant="outline" disabled>
+                <Spinner data-icon="inline-start" />
+                {isSimulationRunning ? "Simulating" : "Thinking"}
+              </Button>
+            </div>
+          ) : (
+            "No messages yet."
+          )
         ) : (
           <div className="flex min-h-full flex-col justify-end gap-3">
             {activeMessages.map((item) => (
@@ -183,10 +304,10 @@ function Chatbox({ selectedSessionId }) {
             ))}
             {isLoading ? (
               <div className="flex items-center gap-2">
-                <AssistantAvatar profile={assistantProfile} />
+                <AssistantAvatar profile={loadingAssistantAvatar} />
                 <Button variant="outline" disabled>
                   <Spinner data-icon="inline-start" />
-                  Thinking
+                  {isSimulationRunning ? "Simulating" : "Thinking"}
                 </Button>
               </div>
             ) : null}
@@ -208,11 +329,14 @@ function Chatbox({ selectedSessionId }) {
           }}
           placeholder={
             hasSelectedSession
-              ? "Type a message..."
+              ? activeMode === "ai-vs-ai"
+                ? "Start the simulation from AI Profile..."
+                : "Type a message..."
               : "Select a valid session first..."
           }
           disabled={
             !hasSelectedSession ||
+            activeMode === "ai-vs-ai" ||
             !hasAssistantProfile ||
             isGeneratingProfile ||
             isLoading
@@ -226,6 +350,7 @@ function Chatbox({ selectedSessionId }) {
           onClick={() => void handleSend()}
           disabled={
             !hasSelectedSession ||
+            activeMode === "ai-vs-ai" ||
             !hasAssistantProfile ||
             isGeneratingProfile ||
             isLoading
@@ -246,6 +371,72 @@ function createAssistantAvatarSnapshot(profile) {
     avatarUrl: profile.avatarUrl,
     avatarEmoji: profile.avatarEmoji,
   };
+}
+
+function createSimulationAvatarSnapshot(speaker, participants) {
+  const participant = participants.find(
+    (item) =>
+      String(item?.name ?? "").trim().toLowerCase() ===
+      String(speaker ?? "").trim().toLowerCase()
+  );
+
+  return {
+    name: participant?.name || speaker,
+    avatarUrl: participant?.avatarUrl || "",
+    avatarEmoji: participant?.initials || deriveInitials(speaker),
+  };
+}
+
+function parseSimulationMessage(raw, participants, turnIndex) {
+  const fallbackSpeaker = participants[turnIndex % participants.length]?.name;
+  const fallback = {
+    speaker: fallbackSpeaker || "AI",
+    message: String(raw ?? "").trim() || "I am ready to continue.",
+  };
+
+  try {
+    const parsed = JSON.parse(String(raw ?? ""));
+    const speaker = String(parsed?.speaker ?? "").trim();
+    const message = String(parsed?.message ?? "").trim();
+    if (isSimulationParticipant(speaker, participants) && message) {
+      return { speaker, message };
+    }
+  } catch {
+    // Fall through to plain-text parsing.
+  }
+
+  const text = String(raw ?? "").trim();
+  const separatorIndex = text.indexOf(":");
+  if (separatorIndex > 0) {
+    const speaker = text.slice(0, separatorIndex).trim();
+    const message = text.slice(separatorIndex + 1).trim();
+    if (isSimulationParticipant(speaker, participants) && message) {
+      return { speaker, message };
+    }
+  }
+
+  return fallback;
+}
+
+function isSimulationParticipant(speaker, participants) {
+  const normalized = String(speaker ?? "").trim().toLowerCase();
+  if (!normalized) return false;
+  return participants.some(
+    (participant) =>
+      String(participant?.name ?? "").trim().toLowerCase() === normalized
+  );
+}
+
+function deriveInitials(name) {
+  const parts = String(name ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) return "AI";
+  return parts
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
 }
 
 function wait(ms) {
