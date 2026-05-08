@@ -3,13 +3,26 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import History from "./components/History/History";
 import Chatbox from "./components/Chatbox/Chatbox";
 import Profile from "@/components/Profile/Profile";
+import { useSessions } from "@/context/SessionsContext";
 
 function App() {
   const [selectedSessionId, setSelectedSessionId] = useState("");
+  const { sessions } = useSessions();
+
+  useEffect(() => {
+    if (sessions.length === 0) {
+      setSelectedSessionId("");
+      return;
+    }
+    const selectedExists = sessions.some((session) => session.id === selectedSessionId);
+    if (!selectedExists) {
+      setSelectedSessionId(sessions[0].id);
+    }
+  }, [selectedSessionId, sessions]);
 
   return (
     <>

@@ -5,7 +5,7 @@ const MAX_SESSIONS = 5;
 const SessionsContext = createContext(null);
 
 export function SessionsProvider({ children }) {
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState([{ id: 1, title: "Session 1" }]);
 
   const addSession = (newSession) => {
     if (sessions.length >= MAX_SESSIONS) return null;

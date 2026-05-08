@@ -80,11 +80,19 @@ function buildAiVsHumanSystemPrompt(profile) {
   return [
     SYSTEM_PROMPT_AI_VS_HUMAN,
     "",
-    SYSTEM_PROMPT_AI_VS_HUMAN_PERSONA_SECTION
-      .replace("{{name}}", name)
-      .replace("{{introduction}}", introduction)
-      .replace("{{personality}}", personality),
+    applyPersonaTemplate(SYSTEM_PROMPT_AI_VS_HUMAN_PERSONA_SECTION, {
+      name,
+      introduction,
+      personality,
+    }),
   ].join("\n");
+}
+
+function applyPersonaTemplate(template, values) {
+  return Object.entries(values).reduce((result, [key, value]) => {
+    const token = `{{${key}}}`;
+    return result.split(token).join(value);
+  }, String(template ?? ""));
 }
 
 function normalizeContent(content) {
