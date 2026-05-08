@@ -7,8 +7,8 @@ function Profile({ selectedSessionId }) {
   const activeMode = getModeForSession(selectedSessionId);
 
   return (
-    <div>
-      <div className="text-sm text-muted-foreground mb-2">
+    <div className="w-full min-w-0">
+      <div className="text-sm text-muted-foreground mb-2 w-full min-w-0">
         {activeMode === "ai-vs-ai" ? <CharacterList /> : null}
         {activeMode === "ai-vs-human" ? <AIProfile /> : null}
       </div>

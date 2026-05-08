@@ -41,7 +41,7 @@ function App() {
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={20}>
-          <div className="flex h-full min-h-0 min-w-0 flex-col items-center p-6">
+          <div className="flex h-full min-h-0 min-w-0 w-full flex-col overflow-auto p-6">
             <Profile selectedSessionId={effectiveSelectedSessionId} />
           </div>
         </ResizablePanel>
