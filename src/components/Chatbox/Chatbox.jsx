@@ -152,7 +152,7 @@ function Chatbox({ selectedSessionId }) {
         ) : !hasSelectedSession ? (
           "This session was removed. Select another session."
         ) : activeMessages.length === 0 ? (
-          `No messages yet for ${selectedSessionId}.`
+          "No messages yet."
         ) : (
           <div className="flex min-h-full flex-col justify-end gap-3">
             {activeMessages.map((item) => (
@@ -204,7 +204,7 @@ function Chatbox({ selectedSessionId }) {
           }}
           placeholder={
             hasSelectedSession
-              ? `Type a message for #${selectedSessionId}...`
+              ? "Type a message..."
               : "Select a valid session first..."
           }
           disabled={!hasSelectedSession || isLoading}
