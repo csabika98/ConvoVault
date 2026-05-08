@@ -27,7 +27,7 @@ export async function getAiReply(conversation, options = {}) {
   });
 
   if (!response.ok) {
-    let errorMessage = `OpenRouter request failed (${response.status})`;
+    let errorMessage = `Deepseek request failed (${response.status})`;
     try {
       const errorBody = await response.json();
       const apiMessage = errorBody?.error?.message || errorBody?.message;
