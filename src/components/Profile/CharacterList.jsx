@@ -1,10 +1,22 @@
+import CharacterCard from "./CharacterCard";
 
 function CharacterList() {
  
   return (
     <>
-      <h1>AI vs. AI</h1>
-      <h3>from: CharacterList.jsx</h3>
+      <div>
+        <CharacterCard
+          character={{
+            name: "Mira",
+            description: "Calm, analytical, and slightly sarcastic. Speaks concisely and notices details.",
+            avatarUrl: "",
+            initials: "M",
+          }}
+          selected={true}
+          onSelect={() => console.log("select character")}
+          onDelete={() => console.log("delete character")}
+        />
+      </div>
     </>
   )
 }
