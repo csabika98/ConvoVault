@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as AvatarPrimitive from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { useSessions } from "@/context/sessions/useSessions";
 import { useProfile } from "@/context/profile/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { Spinner } from "@/components/ui/spinner";
 import { SendIcon } from "lucide-react";
+import Message, { AssistantAvatar } from "@/components/Chatbox/Message";
 
 function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
@@ -157,26 +157,12 @@ function Chatbox({ selectedSessionId }) {
         ) : (
           <div className="flex min-h-full flex-col justify-end gap-3">
             {activeMessages.map((item) => (
-              <div
+              <Message
                 key={item.id}
-                className={`flex max-w-[85%] items-end gap-2 ${
-                  item.role === "user" ? "ml-auto" : ""
-                }`}
-              >
-                {item.role === "assistant" ? (
-                  <AssistantAvatar profile={item.assistantAvatar} />
-                ) : null}
-                <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
-                  {item.content}
-                </div>
-                {item.role === "user" ? (
-                  <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                      HU
-                    </AvatarPrimitive.Avatar.Fallback>
-                  </AvatarPrimitive.Avatar.Root>
-                ) : null}
-              </div>
+                role={item.role}
+                content={item.content}
+                assistantAvatar={item.assistantAvatar}
+              />
             ))}
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -222,23 +208,6 @@ function Chatbox({ selectedSessionId }) {
         </Button>
       </div>
     </div>
-  );
-}
-
-function AssistantAvatar({ profile }) {
-  const fallback = profile?.avatarEmoji || "AI";
-
-  return (
-    <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-      <AvatarPrimitive.Avatar.Image
-        className="h-full w-full object-cover"
-        src={profile?.avatarUrl || undefined}
-        alt={profile?.name ? `${profile.name} avatar` : "Assistant avatar"}
-      />
-      <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
-        {fallback}
-      </AvatarPrimitive.Avatar.Fallback>
-    </AvatarPrimitive.Avatar.Root>
   );
 }
 

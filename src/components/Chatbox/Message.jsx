@@ -1,47 +1,49 @@
 import * as AvatarPrimitive from "radix-ui";
-import { Card, CardContent } from "@/components/ui/card";
 
-function Message({ role, content }) {
+function Message({ role, content, assistantAvatar }) {
   const isUser = role === "user";
 
   return (
     <div className={`flex max-w-[85%] items-end gap-2 ${isUser ? "ml-auto" : ""}`}>
       {!isUser ? (
-        <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
-          <AvatarPrimitive.Avatar.Image
-            className="aspect-square h-full w-full"
-            src=""
-            alt="Assistant avatar"
-          />
-          <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
-            AI
-          </AvatarPrimitive.Avatar.Fallback>
-        </AvatarPrimitive.Avatar.Root>
+        <AssistantAvatar profile={assistantAvatar} />
       ) : null}
 
-      <Card className={`w-fit ${isUser ? "bg-muted" : "bg-card"}`}>
-        <CardContent
-          className={`whitespace-pre-wrap px-3 py-2 text-foreground ${
-            isUser ? "text-right" : "text-left"
-          }`}
-        >
-          {content}
-        </CardContent>
-      </Card>
+      <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
+        {content}
+      </div>
 
       {isUser ? (
-        <AvatarPrimitive.Avatar.Root className="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-full">
-          <AvatarPrimitive.Avatar.Image
-            className="aspect-square h-full w-full"
-            src=""
-            alt="Human avatar"
-          />
-          <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-            HU
-          </AvatarPrimitive.Avatar.Fallback>
-        </AvatarPrimitive.Avatar.Root>
+        <UserAvatar />
       ) : null}
     </div>
+  );
+}
+
+export function AssistantAvatar({ profile }) {
+  const fallback = profile?.avatarEmoji || "AI";
+
+  return (
+    <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+      <AvatarPrimitive.Avatar.Image
+        className="h-full w-full object-cover"
+        src={profile?.avatarUrl || undefined}
+        alt={profile?.name ? `${profile.name} avatar` : "Assistant avatar"}
+      />
+      <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+        {fallback}
+      </AvatarPrimitive.Avatar.Fallback>
+    </AvatarPrimitive.Avatar.Root>
+  );
+}
+
+function UserAvatar() {
+  return (
+    <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+      <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+        HU
+      </AvatarPrimitive.Avatar.Fallback>
+    </AvatarPrimitive.Avatar.Root>
   );
 }
 
