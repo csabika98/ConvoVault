@@ -8,6 +8,7 @@ import History from "./components/History/History";
 import Chatbox from "./components/Chatbox/Chatbox";
 import Profile from "@/components/Profile/Profile";
 import { useSessions } from "@/context/sessions/useSessions";
+import SettingsSheet from "@/components/Settings/SettingsSheet";
 
 function App() {
   const [selectedSessionId, setSelectedSessionId] = useState("");
@@ -19,7 +20,8 @@ function App() {
   }, [selectedSessionId, sessions]);
 
   return (
-    <>
+    <div className="relative h-[100dvh] bg-background text-foreground">
+      <SettingsSheet />
       <ResizablePanelGroup
         orientation="horizontal"
         className="h-[100dvh] min-w-0 rounded-lg border"
@@ -46,7 +48,7 @@ function App() {
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
-    </>
+    </div>
   )
 }
 

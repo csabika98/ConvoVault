@@ -1,11 +1,26 @@
 import { useState } from "react";
 import { ProfileContext } from "@/context/profile/ProfileContext";
 
+const USER_AVATAR_STORAGE_KEY = "convovault-user-avatar";
+
 export function ProfileProvider({ children }) {
   const [modeBySession, setModeBySession] = useState({});
   const [assistantProfile, setAssistantProfile] = useState(null);
   const [isGeneratingProfile, setIsGeneratingProfile] = useState(false);
+  const [userAvatarUrl, setUserAvatarUrlState] = useState(
+    () => localStorage.getItem(USER_AVATAR_STORAGE_KEY) || ""
+  );
   const [recentPersonNames, setRecentPersonNames] = useState([]);
+
+  const setUserAvatarUrl = (avatarUrl) => {
+    const nextAvatarUrl = String(avatarUrl ?? "");
+    if (nextAvatarUrl) {
+      localStorage.setItem(USER_AVATAR_STORAGE_KEY, nextAvatarUrl);
+    } else {
+      localStorage.removeItem(USER_AVATAR_STORAGE_KEY);
+    }
+    setUserAvatarUrlState(nextAvatarUrl);
+  };
 
   const getModeForSession = (sessionId) => {
     if (!sessionId) return "ai-vs-human";
@@ -48,6 +63,8 @@ export function ProfileProvider({ children }) {
         setAssistantProfile,
         isGeneratingProfile,
         setIsGeneratingProfile,
+        userAvatarUrl,
+        setUserAvatarUrl,
         recentPersonNames,
         rememberPersonName,
         getModeForSession,
