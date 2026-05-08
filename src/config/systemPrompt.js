@@ -24,3 +24,37 @@ Modes:
 - Default is AI vs Human: the user is one participant and the other 3–4 participants are the chosen figures.
 - AI vs AI: simulate all participants without requiring user replies. Write in English and simulate personas based on the provided context.`;
 
+export function buildCharacterProfilePrompt(excludedNames = []) {
+  const blocked = Array.isArray(excludedNames)
+    ? excludedNames
+        .map((name) => String(name ?? "").trim())
+        .filter(Boolean)
+        .slice(0, 8)
+    : [];
+
+  return [
+    "Generate a single AI assistant character profile for a chat app.",
+    "The character must be a real famous person (historical or public figure), not fictional.",
+    "Return STRICT JSON only with these string fields:",
+    '{ "name": "...", "introduction": "...", "personality": "...", "wikipediaTitle": "...", "avatarEmoji": "..." }',
+    "Rules:",
+    "- name: use the exact famous person's common full name",
+    "- introduction: one short sentence under 120 characters",
+    "- personality: 1-2 sentences matching that person's known communication style",
+    '- wikipediaTitle: exact English Wikipedia page title for that person (example: "Albert Einstein")',
+    '- avatarEmoji: exactly one emoji that matches the persona vibe, it should be colorful',
+    "- do not use fictional characters",
+    blocked.length > 0
+      ? `- do not use any of these already-used people: ${blocked.join(", ")}`
+      : "",
+    "- no markdown, no backticks, no extra keys",
+  ].join("\n");
+}
+
+export const SYSTEM_PROMPT_AI_VS_HUMAN_PERSONA_SECTION = [
+  "Persona to follow for this conversation:",
+  "- Name: {{name}}",
+  "- Introduction: {{introduction}}",
+  "- Personality: {{personality}}",
+  "- Stay consistent with this persona's tone and style in all replies.",
+].join("\n");

@@ -4,6 +4,8 @@ const ProfileContext = createContext(null);
 
 export function ProfileProvider({ children }) {
   const [modeBySession, setModeBySession] = useState({});
+  const [assistantProfile, setAssistantProfile] = useState(null);
+  const [recentPersonNames, setRecentPersonNames] = useState([]);
 
   const getModeForSession = (sessionId) => {
     if (!sessionId) return "ai-vs-human";
@@ -27,10 +29,25 @@ export function ProfileProvider({ children }) {
     setModeForSession(sessionId, "ai-vs-human");
   };
 
+  const rememberPersonName = (name) => {
+    const normalized = String(name ?? "").trim();
+    if (!normalized) return;
+    setRecentPersonNames((prev) => {
+      const deduped = prev.filter(
+        (item) => item.toLowerCase() !== normalized.toLowerCase()
+      );
+      return [normalized, ...deduped].slice(0, 8);
+    });
+  };
+
   return (
     <ProfileContext.Provider
       value={{
         modeBySession,
+        assistantProfile,
+        setAssistantProfile,
+        recentPersonNames,
+        rememberPersonName,
         getModeForSession,
         setModeForSession,
         setAiVsAiForSession,

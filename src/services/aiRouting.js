@@ -1,4 +1,8 @@
-import { SYSTEM_PROMPT_AI_VS_AI, SYSTEM_PROMPT_AI_VS_HUMAN } from "@/config/systemPrompt.js";
+import {
+  SYSTEM_PROMPT_AI_VS_AI,
+  SYSTEM_PROMPT_AI_VS_HUMAN,
+  SYSTEM_PROMPT_AI_VS_HUMAN_PERSONA_SECTION,
+} from "@/config/systemPrompt.js";
 
 const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 
@@ -54,12 +58,33 @@ function withSystemPrompt(conversation, options) {
   if (hasSystem) return safe;
 
   const mode = options?.mode === "ai-vs-ai" ? "ai-vs-ai" : "ai-vs-human";
-  const systemPrompt = mode === "ai-vs-ai" ? SYSTEM_PROMPT_AI_VS_AI : SYSTEM_PROMPT_AI_VS_HUMAN;
+  const systemPrompt =
+    mode === "ai-vs-ai"
+      ? SYSTEM_PROMPT_AI_VS_AI
+      : buildAiVsHumanSystemPrompt(options?.assistantProfile);
 
   return [
     { role: "system", content: systemPrompt },
     ...safe,
   ];
+}
+
+function buildAiVsHumanSystemPrompt(profile) {
+  if (!profile) return SYSTEM_PROMPT_AI_VS_HUMAN;
+
+  const name = String(profile?.name ?? "").trim();
+  const introduction = String(profile?.introduction ?? "").trim();
+  const personality = String(profile?.personality ?? "").trim();
+  if (!name || !introduction || !personality) return SYSTEM_PROMPT_AI_VS_HUMAN;
+
+  return [
+    SYSTEM_PROMPT_AI_VS_HUMAN,
+    "",
+    SYSTEM_PROMPT_AI_VS_HUMAN_PERSONA_SECTION
+      .replace("{{name}}", name)
+      .replace("{{introduction}}", introduction)
+      .replace("{{personality}}", personality),
+  ].join("\n");
 }
 
 function normalizeContent(content) {

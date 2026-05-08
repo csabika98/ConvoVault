@@ -9,8 +9,12 @@ import { SendIcon } from "lucide-react";
 
 function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
-  const { getModeForSession, setAiVsAiForSession, setHumanVsAiForSession } =
-    useProfile();
+  const {
+    assistantProfile,
+    getModeForSession,
+    setAiVsAiForSession,
+    setHumanVsAiForSession,
+  } = useProfile();
 
   const [message, setMessage] = useState("");
   const [messagesBySession, setMessagesBySession] = useState({});
@@ -38,29 +42,6 @@ function Chatbox({ selectedSessionId }) {
   useEffect(() => {
     sessionIdsRef.current = sessionIds;
   }, [sessionIds]);
-
-  useEffect(() => {
-    setMessagesBySession((prev) => {
-      const next = {};
-      let changed = false;
-
-      for (const [sessionId, messages] of Object.entries(prev)) {
-        if (sessionIds.has(sessionId)) {
-          next[sessionId] = messages;
-        } else {
-          changed = true;
-        }
-      }
-
-      return changed ? next : prev;
-    });
-  }, [sessionIds]);
-
-  useEffect(() => {
-    if (!hasSelectedSession) {
-      setMessage("");
-    }
-  }, [hasSelectedSession]);
 
   useEffect(() => {
     const el = messagesContainerRef.current;
@@ -95,7 +76,10 @@ function Chatbox({ selectedSessionId }) {
         { role: "user", content: text },
       ];
 
-      const ai = await getAiReply(baseConversation, { mode: activeMode });
+      const ai = await getAiReply(baseConversation, {
+        mode: activeMode,
+        assistantProfile,
+      });
       if (!sessionIdsRef.current.has(currentSessionKey)) return;
 
       const assistantChunks = splitIntoChatBubbles(ai.content, 2);
@@ -213,8 +197,10 @@ function Chatbox({ selectedSessionId }) {
 
       <div className="mt-4 flex min-w-0 shrink-0 items-end gap-2">
         <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          value={hasSelectedSession ? message : ""}
+          onChange={(e) => {
+            if (hasSelectedSession) setMessage(e.target.value);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
