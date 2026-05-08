@@ -1,22 +1,19 @@
 import { SYSTEM_PROMPT_AI_VS_AI, SYSTEM_PROMPT_AI_VS_HUMAN } from "@/config/systemPrompt.js";
 
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 
 export async function getAiReply(conversation, options = {}) {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
   if (!apiKey) {
-    throw new Error("Missing VITE_OPENROUTER_API_KEY in your environment.");
+    throw new Error("Missing VITE_DEEPSEEK_API_KEY in your environment.");
   }
 
-  const model =
-    import.meta.env.VITE_OPENROUTER_MODEL || import.meta.env.VITE_OPENROUTER_MODEL_DEFAULT;
+  const model = import.meta.env.VITE_DEEPSEEK_MODEL || "deepseek-v4-pro";
   if (!model) {
-    throw new Error(
-      "Missing model configuration. Set VITE_OPENROUTER_MODEL or VITE_OPENROUTER_MODEL_DEFAULT in your environment."
-    );
+    throw new Error("Missing model configuration. Set VITE_DEEPSEEK_MODEL in your environment.");
   }
 
-  const response = await fetch(OPENROUTER_URL, {
+  const response = await fetch(DEEPSEEK_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -25,7 +22,7 @@ export async function getAiReply(conversation, options = {}) {
     body: JSON.stringify({
       model,
       messages: withSystemPrompt(conversation, options),
-      reasoning: { enabled: true },
+      thinking: { type: "enabled" },
     }),
   });
 
