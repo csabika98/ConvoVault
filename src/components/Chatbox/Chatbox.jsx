@@ -94,19 +94,25 @@ function Chatbox({ selectedSessionId }) {
       if (!sessionIdsRef.current.has(currentSessionKey)) return;
 
       const assistantChunks = splitIntoChatBubbles(ai.content, 2);
-      setMessagesBySession((prev) => ({
-        ...prev,
-        [currentSessionKey]: [
-          ...(prev[currentSessionKey] ?? []),
-          ...assistantChunks.map((chunk) => ({
-            id: crypto.randomUUID(),
-            content: chunk,
-            role: "assistant",
-            assistantAvatar,
-            reasoningDetails: ai.reasoningDetails,
-          })),
-        ],
-      }));
+      for (const [index, chunk] of assistantChunks.entries()) {
+        setMessagesBySession((prev) => ({
+          ...prev,
+          [currentSessionKey]: [
+            ...(prev[currentSessionKey] ?? []),
+            {
+              id: crypto.randomUUID(),
+              content: chunk,
+              role: "assistant",
+              assistantAvatar,
+              reasoningDetails: index === 0 ? ai.reasoningDetails : undefined,
+            },
+          ],
+        }));
+        if (index < assistantChunks.length - 1) {
+          await wait(650);
+          if (!sessionIdsRef.current.has(currentSessionKey)) return;
+        }
+      }
     } catch (error) {
       const detail = error instanceof Error ? error.message : String(error);
       setMessagesBySession((prev) => ({
@@ -238,6 +244,12 @@ function createAssistantAvatarSnapshot(profile) {
     avatarUrl: profile.avatarUrl,
     avatarEmoji: profile.avatarEmoji,
   };
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 function splitIntoChatBubbles(text, maxSentencesPerBubble) {

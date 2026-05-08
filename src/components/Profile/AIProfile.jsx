@@ -13,7 +13,7 @@ import { buildCharacterProfilePrompt } from "@/config/systemPrompt";
 import { useProfile } from "@/context/profile/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function AIProfile() {
   const {
@@ -25,6 +25,7 @@ function AIProfile() {
     rememberPersonName,
   } = useProfile();
   const [isFetchingPortrait, setIsFetchingPortrait] = useState(false);
+  const profileGenerationRef = useRef(false);
   const profile = assistantProfile;
 
   const hydratePortrait = useCallback(
@@ -54,6 +55,8 @@ function AIProfile() {
   );
 
   const regenerateProfile = useCallback(async () => {
+    if (profileGenerationRef.current) return;
+    profileGenerationRef.current = true;
     setIsGeneratingProfile(true);
     try {
       const exclusions = Array.from(
@@ -88,6 +91,7 @@ function AIProfile() {
     } catch (error) {
       console.error(error);
     } finally {
+      profileGenerationRef.current = false;
       setIsGeneratingProfile(false);
     }
   }, [
@@ -100,12 +104,12 @@ function AIProfile() {
   ]);
 
   useEffect(() => {
-    if (assistantProfile) return;
+    if (assistantProfile || isGeneratingProfile) return;
     const frame = requestAnimationFrame(() => {
       void regenerateProfile();
     });
     return () => cancelAnimationFrame(frame);
-  }, [assistantProfile, regenerateProfile]);
+  }, [assistantProfile, isGeneratingProfile, regenerateProfile]);
 
   return (
     <>
