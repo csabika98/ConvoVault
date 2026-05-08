@@ -4,6 +4,7 @@ import { ProfileContext } from "@/context/profile/ProfileContext";
 export function ProfileProvider({ children }) {
   const [modeBySession, setModeBySession] = useState({});
   const [assistantProfile, setAssistantProfile] = useState(null);
+  const [isGeneratingProfile, setIsGeneratingProfile] = useState(false);
   const [recentPersonNames, setRecentPersonNames] = useState([]);
 
   const getModeForSession = (sessionId) => {
@@ -45,6 +46,8 @@ export function ProfileProvider({ children }) {
         modeBySession,
         assistantProfile,
         setAssistantProfile,
+        isGeneratingProfile,
+        setIsGeneratingProfile,
         recentPersonNames,
         rememberPersonName,
         getModeForSession,

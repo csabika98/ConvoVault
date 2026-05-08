@@ -19,10 +19,11 @@ function AIProfile() {
   const {
     assistantProfile,
     setAssistantProfile,
+    isGeneratingProfile,
+    setIsGeneratingProfile,
     recentPersonNames,
     rememberPersonName,
   } = useProfile();
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isFetchingPortrait, setIsFetchingPortrait] = useState(false);
   const profile = assistantProfile;
 
@@ -53,7 +54,7 @@ function AIProfile() {
   );
 
   const regenerateProfile = useCallback(async () => {
-    setIsGenerating(true);
+    setIsGeneratingProfile(true);
     try {
       const exclusions = Array.from(
         new Set(
@@ -87,10 +88,11 @@ function AIProfile() {
     } catch (error) {
       console.error(error);
     } finally {
-      setIsGenerating(false);
+      setIsGeneratingProfile(false);
     }
   }, [
     hydratePortrait,
+    setIsGeneratingProfile,
     profile,
     recentPersonNames,
     rememberPersonName,
@@ -128,7 +130,7 @@ function AIProfile() {
           {!profile ? (
             <div className="flex items-center justify-center gap-2 rounded-md border border-border/60 bg-muted/30 p-3 text-sm">
               <Spinner />
-              <span>{isGenerating ? "Generating profile..." : "Loading profile..."}</span>
+              <span>{isGeneratingProfile ? "Generating profile..." : "Loading profile..."}</span>
             </div>
           ) : (
             <>
@@ -139,14 +141,14 @@ function AIProfile() {
                 size="sm"
                 variant="outline"
                 onClick={() => void regenerateProfile()}
-                disabled={isGenerating || isFetchingPortrait}
+                disabled={isGeneratingProfile || isFetchingPortrait}
               >
                 <RefreshCw
                   className={`size-3.5 mr-1 ${
-                    isGenerating || isFetchingPortrait ? "animate-spin" : ""
+                    isGeneratingProfile || isFetchingPortrait ? "animate-spin" : ""
                   }`}
                 />
-                {isGenerating
+                {isGeneratingProfile
                   ? "Refreshing..."
                   : isFetchingPortrait
                   ? "Fetching portrait..."
