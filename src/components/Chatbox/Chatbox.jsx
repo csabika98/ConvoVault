@@ -67,6 +67,7 @@ function Chatbox({ selectedSessionId }) {
 
     inFlightRef.current = true;
     setIsLoading(true);
+    const assistantAvatar = createAssistantAvatarSnapshot(assistantProfile);
     try {
       const baseConversation = [
         ...(messagesBySession[currentSessionKey] ?? []).map((item) => ({
@@ -91,6 +92,7 @@ function Chatbox({ selectedSessionId }) {
             id: crypto.randomUUID(),
             content: chunk,
             role: "assistant",
+            assistantAvatar,
             reasoningDetails: ai.reasoningDetails,
           })),
         ],
@@ -105,6 +107,7 @@ function Chatbox({ selectedSessionId }) {
             id: crypto.randomUUID(),
             content: `AI request failed: ${detail}`,
             role: "assistant",
+            assistantAvatar,
           },
         ],
       }));
@@ -160,11 +163,7 @@ function Chatbox({ selectedSessionId }) {
                 }`}
               >
                 {item.role === "assistant" ? (
-                  <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
-                      AI
-                    </AvatarPrimitive.Avatar.Fallback>
-                  </AvatarPrimitive.Avatar.Root>
+                  <AssistantAvatar profile={item.assistantAvatar} />
                 ) : null}
                 <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
                   {item.content}
@@ -180,11 +179,7 @@ function Chatbox({ selectedSessionId }) {
             ))}
             {isLoading ? (
               <div className="flex items-center gap-2">
-                <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                  <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
-                    AI
-                  </AvatarPrimitive.Avatar.Fallback>
-                </AvatarPrimitive.Avatar.Root>
+                <AssistantAvatar profile={assistantProfile} />
                 <Button variant="outline" disabled>
                   <Spinner data-icon="inline-start" />
                   Thinking
@@ -227,6 +222,33 @@ function Chatbox({ selectedSessionId }) {
       </div>
     </div>
   );
+}
+
+function AssistantAvatar({ profile }) {
+  const fallback = profile?.avatarEmoji || "AI";
+
+  return (
+    <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+      <AvatarPrimitive.Avatar.Image
+        className="h-full w-full object-cover"
+        src={profile?.avatarUrl || undefined}
+        alt={profile?.name ? `${profile.name} avatar` : "Assistant avatar"}
+      />
+      <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+        {fallback}
+      </AvatarPrimitive.Avatar.Fallback>
+    </AvatarPrimitive.Avatar.Root>
+  );
+}
+
+function createAssistantAvatarSnapshot(profile) {
+  if (!profile) return null;
+
+  return {
+    name: profile.name,
+    avatarUrl: profile.avatarUrl,
+    avatarEmoji: profile.avatarEmoji,
+  };
 }
 
 function splitIntoChatBubbles(text, maxSentencesPerBubble) {

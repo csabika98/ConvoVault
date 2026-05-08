@@ -1,18 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SessionContext } from "@/context/sessions/SessionContext";
 
 const MAX_SESSIONS = 5;
 
 export function SessionsProvider({ children }) {
   const [sessions, setSessions] = useState([{ id: 1, title: "Session 1" }]);
+  const nextSessionIdRef = useRef(2);
 
   const addSession = (newSession) => {
     if (sessions.length >= MAX_SESSIONS) return null;
 
-    const nextId =
-      sessions.length > 0
-        ? Math.max(...sessions.map((s) => s.id)) + 1
-        : 1;
+    const nextId = nextSessionIdRef.current;
+    nextSessionIdRef.current += 1;
 
     setSessions((prev) => [
       ...prev,

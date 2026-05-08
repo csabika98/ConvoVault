@@ -185,8 +185,7 @@ function parseCharacterProfile(raw) {
 }
 
 async function fetchWikipediaPortraitUrl(title) {
-  const rawTitle = String(title ?? "").trim();
-  const safeTitle = encodeURIComponent(rawTitle);
+  const safeTitle = encodeURIComponent(String(title ?? "").trim());
   if (!safeTitle) return null;
 
   try {
@@ -201,20 +200,17 @@ async function fetchWikipediaPortraitUrl(title) {
 
     const pageImageUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&piprop=thumbnail&pithumbsize=512&redirects=1&format=json&titles=${safeTitle}&origin=*`;
     const response = await fetch(pageImageUrl);
-    if (response.ok) {
-      const data = await response.json();
-      const pages = data?.query?.pages;
-      if (pages && typeof pages === "object") {
-        for (const page of Object.values(pages)) {
-          const source = page?.thumbnail?.source;
-          if (typeof source === "string" && source) return source;
-        }
-      }
+    if (!response.ok) return null;
+    const data = await response.json();
+    const pages = data?.query?.pages;
+    if (!pages || typeof pages !== "object") return null;
+    for (const page of Object.values(pages)) {
+      const source = page?.thumbnail?.source;
+      if (typeof source === "string" && source) return source;
     }
-
-    return buildGeneratedAvatarUrl(rawTitle);
+    return null;
   } catch {
-    return buildGeneratedAvatarUrl(rawTitle);
+    return null;
   }
 }
 
@@ -224,9 +220,4 @@ function containsName(list, value) {
   return list.some(
     (item) => String(item ?? "").trim().toLowerCase() === normalizedValue
   );
-}
-
-function buildGeneratedAvatarUrl(seed) {
-  const safeSeed = encodeURIComponent(String(seed ?? "").trim() || "famous-person");
-  return `https://api.dicebear.com/9.x/personas/svg?seed=${safeSeed}&backgroundType=gradientLinear`;
 }
