@@ -7,10 +7,10 @@ import { ProfileProvider } from './context/ProfileContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ProfileProvider>
-      <SessionsProvider>
+    <SessionsProvider>
+      <ProfileProvider>
         <App />
-      </SessionsProvider>
-    </ProfileProvider>
+      </ProfileProvider>
+    </SessionsProvider>
   </StrictMode>,
 )

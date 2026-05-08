@@ -2,26 +2,33 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as AvatarPrimitive from "radix-ui";
 import { Button } from "@/components/ui/button";
 import { useSessions } from "@/context/SessionsContext";
+import { useProfile } from "@/context/ProfileContext";
 import { getAiReply } from "@/services/aiRouting";
-import { Spinner } from "@/components/ui/spinner"
-import { SendIcon } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner";
+import { SendIcon } from "lucide-react";
 
 function Chatbox({ selectedSessionId }) {
   const { sessions } = useSessions();
+  const { getModeForSession, setAiVsAiForSession, setHumanVsAiForSession } =
+    useProfile();
+
   const [message, setMessage] = useState("");
   const [messagesBySession, setMessagesBySession] = useState({});
-  const [modeBySession, setModeBySession] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const inFlightRef = useRef(false);
   const messagesContainerRef = useRef(null);
+
   const sessionIds = useMemo(
     () => new Set(sessions.map((session) => String(session.id))),
     [sessions]
   );
+
   const sessionIdsRef = useRef(sessionIds);
   const selectedSessionKey = selectedSessionId ? String(selectedSessionId) : "";
-  const hasSelectedSession = Boolean(selectedSessionKey && sessionIds.has(selectedSessionKey));
-  const activeMode = modeBySession[selectedSessionKey] ?? "ai-vs-human";
+  const hasSelectedSession = Boolean(
+    selectedSessionKey && sessionIds.has(selectedSessionKey)
+  );
+  const activeMode = getModeForSession(selectedSessionKey);
 
   const activeMessages = useMemo(() => {
     if (!hasSelectedSession) return [];
@@ -40,21 +47,6 @@ function Chatbox({ selectedSessionId }) {
       for (const [sessionId, messages] of Object.entries(prev)) {
         if (sessionIds.has(sessionId)) {
           next[sessionId] = messages;
-        } else {
-          changed = true;
-        }
-      }
-
-      return changed ? next : prev;
-    });
-
-    setModeBySession((prev) => {
-      const next = {};
-      let changed = false;
-
-      for (const [sessionId, mode] of Object.entries(prev)) {
-        if (sessionIds.has(sessionId)) {
-          next[sessionId] = mode;
         } else {
           changed = true;
         }
@@ -147,9 +139,7 @@ function Chatbox({ selectedSessionId }) {
             type="button"
             size="sm"
             variant={activeMode === "ai-vs-human" ? "default" : "outline"}
-            onClick={() =>
-              setModeBySession((prev) => ({ ...prev, [selectedSessionKey]: "ai-vs-human" }))
-            }
+            onClick={() => setHumanVsAiForSession(selectedSessionKey)}
             disabled={isLoading}
           >
             AI vs Human
@@ -158,15 +148,14 @@ function Chatbox({ selectedSessionId }) {
             type="button"
             size="sm"
             variant={activeMode === "ai-vs-ai" ? "default" : "outline"}
-            onClick={() =>
-              setModeBySession((prev) => ({ ...prev, [selectedSessionKey]: "ai-vs-ai" }))
-            }
+            onClick={() => setAiVsAiForSession(selectedSessionKey)}
             disabled={isLoading}
           >
             AI vs AI
           </Button>
         </div>
       ) : null}
+
       <div
         ref={messagesContainerRef}
         className="min-h-0 flex-1 overflow-auto rounded-md p-4 text-sm text-muted-foreground scroll-smooth"
@@ -188,26 +177,16 @@ function Chatbox({ selectedSessionId }) {
               >
                 {item.role === "assistant" ? (
                   <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <AvatarPrimitive.Avatar.Image
-                      className="aspect-square h-full w-full"
-                      src=""
-                      alt="Assistant avatar"
-                    />
                     <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
                       AI
                     </AvatarPrimitive.Avatar.Fallback>
                   </AvatarPrimitive.Avatar.Root>
                 ) : null}
-                  <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
-                    {item.content}
-                  </div>
+                <div className="rounded-xl bg-muted p-3 text-sm text-gray-900">
+                  {item.content}
+                </div>
                 {item.role === "user" ? (
                   <AvatarPrimitive.Avatar.Root className="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <AvatarPrimitive.Avatar.Image
-                      className="aspect-square h-full w-full"
-                      src=""
-                      alt="Human avatar"
-                    />
                     <AvatarPrimitive.Avatar.Fallback className="flex h-full w-full items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                       HU
                     </AvatarPrimitive.Avatar.Fallback>
@@ -231,6 +210,7 @@ function Chatbox({ selectedSessionId }) {
           </div>
         )}
       </div>
+
       <div className="mt-4 flex min-w-0 shrink-0 items-end gap-2">
         <textarea
           value={message}
@@ -250,7 +230,12 @@ function Chatbox({ selectedSessionId }) {
           rows={6}
           className="h-20 min-h-10 max-h-72 min-w-[320px] flex-1 resize rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-60"
         />
-        <Button size="icon" type="button" onClick={() => void handleSend()} disabled={!hasSelectedSession || isLoading}>
+        <Button
+          size="icon"
+          type="button"
+          onClick={() => void handleSend()}
+          disabled={!hasSelectedSession || isLoading}
+        >
           {isLoading ? <Spinner /> : <SendIcon />}
         </Button>
       </div>
