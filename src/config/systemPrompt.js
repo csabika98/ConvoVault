@@ -50,6 +50,29 @@ export function buildAiVsAiSystemPrompt(characters = []) {
   ].join("\n");
 }
 
+/**
+ * Ask the model for a profile for a specific real-world person (by name).
+ */
+export function buildNamedCharacterProfilePrompt(requestedName) {
+  const name = String(requestedName ?? "").trim();
+  if (!name) return "";
+
+  return [
+    "Generate a single AI assistant character profile for a chat app.",
+    `The character must be this real famous person (historical or public figure): ${name}.`,
+    "If the name is ambiguous, choose the single best-known real person who matches.",
+    "Return STRICT JSON only with these string fields:",
+    "Rules:",
+    "- name: use the exact famous person's common full name",
+    "- introduction: one short sentence under 120 characters",
+    "- personality: 1-2 sentences matching that person's known communication style",
+    '- wikipediaTitle: exact English Wikipedia page title for that person',
+    '- avatarEmoji: exactly one emoji that matches the persona vibe, it should be colorful',
+    "- do not use fictional characters",
+    "- no markdown, no backticks, no extra keys",
+  ].join("\n");
+}
+
 export function buildCharacterProfilePrompt(excludedNames = []) {
   const blocked = Array.isArray(excludedNames)
     ? excludedNames

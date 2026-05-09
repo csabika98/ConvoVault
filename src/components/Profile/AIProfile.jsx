@@ -9,11 +9,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { buildCharacterProfilePrompt } from "@/config/systemPrompt";
+import {
+  buildCharacterProfilePrompt,
+  buildNamedCharacterProfilePrompt,
+} from "@/config/systemPrompt";
 import { useProfile } from "@/context/profile/useProfile";
 import { getAiReply } from "@/services/aiRouting";
 import { fetchWikipediaPortraitUrl } from "@/services/wikipediaPortrait";
-import { RefreshCw } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, Edit3, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 function AIProfile() {
@@ -26,8 +30,17 @@ function AIProfile() {
     rememberPersonName,
   } = useProfile();
   const [isFetchingPortrait, setIsFetchingPortrait] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState("");
+  const nameInputRef = useRef(null);
   const profileGenerationRef = useRef(false);
   const profile = assistantProfile;
+
+  useEffect(() => {
+    if (isEditingName && nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, [isEditingName]);
 
   const hydratePortrait = useCallback(
     async (nextProfile) => {
@@ -104,6 +117,69 @@ function AIProfile() {
     setAssistantProfile,
   ]);
 
+  const regenerateProfileForRequestedName = useCallback(
+    async (requestedName) => {
+      const trimmed = String(requestedName ?? "").trim();
+      if (!trimmed) return;
+
+      const prompt = buildNamedCharacterProfilePrompt(trimmed);
+      if (!prompt) return;
+
+      if (profileGenerationRef.current) return;
+      profileGenerationRef.current = true;
+      setIsGeneratingProfile(true);
+      try {
+        let nextProfile = null;
+        const maxAttempts = 4;
+        for (let i = 0; i < maxAttempts; i += 1) {
+          const reply = await getAiReply([{ role: "user", content: prompt }], {
+            mode: "ai-vs-human",
+          });
+          const candidate = parseCharacterProfile(reply.content);
+          if (candidate) {
+            nextProfile = candidate;
+            break;
+          }
+        }
+        if (!nextProfile) return;
+        setAssistantProfile(nextProfile);
+        rememberPersonName(nextProfile.name);
+        void hydratePortrait(nextProfile);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        profileGenerationRef.current = false;
+        setIsGeneratingProfile(false);
+      }
+    },
+    [
+      hydratePortrait,
+      rememberPersonName,
+      setAssistantProfile,
+      setIsGeneratingProfile,
+    ]
+  );
+
+  const handleNameEditToggle = () => {
+    const busy = isGeneratingProfile || isFetchingPortrait;
+    if (busy) return;
+
+    if (isEditingName) {
+      const trimmed = editName.trim();
+      if (!trimmed) {
+        setEditName(profile?.name ?? "");
+        setIsEditingName(false);
+        return;
+      }
+      setIsEditingName(false);
+      void regenerateProfileForRequestedName(trimmed);
+      return;
+    }
+
+    setEditName(profile?.name ?? "");
+    setIsEditingName(true);
+  };
+
   useEffect(() => {
     if (assistantProfile || isGeneratingProfile) return;
     const frame = requestAnimationFrame(() => {
@@ -126,7 +202,55 @@ function AIProfile() {
             </Avatar>
           </EmptyMedia>
 
-          <EmptyTitle>{profile?.name || "Generating profile..."}</EmptyTitle>
+          {!profile ? (
+            <EmptyTitle>Generating profile...</EmptyTitle>
+          ) : isEditingName ? (
+            <EmptyTitle className="flex w-full min-w-0 max-w-sm flex-wrap items-center justify-center gap-2">
+              <Input
+                ref={nameInputRef}
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="h-9 min-w-0 flex-1 text-center text-base md:text-sm"
+                disabled={isGeneratingProfile || isFetchingPortrait}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleNameEditToggle();
+                  }
+                  if (e.key === "Escape") {
+                    setIsEditingName(false);
+                    setEditName(profile.name);
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 shrink-0 p-0"
+                disabled={isGeneratingProfile || isFetchingPortrait}
+                onClick={handleNameEditToggle}
+              >
+                <Check className="size-4" />
+                <span className="sr-only">Confirm name</span>
+              </Button>
+            </EmptyTitle>
+          ) : (
+            <EmptyTitle className="flex w-full min-w-0 max-w-sm flex-wrap items-center justify-center gap-2">
+              <span className="min-w-0 truncate">{profile.name}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 shrink-0 p-0"
+                disabled={isGeneratingProfile || isFetchingPortrait}
+                onClick={handleNameEditToggle}
+              >
+                <Edit3 className="size-4" />
+                <span className="sr-only">Edit name</span>
+              </Button>
+            </EmptyTitle>
+          )}
           <EmptyDescription>
             {profile?.introduction || "Please wait while we create your AI character."}
           </EmptyDescription>
