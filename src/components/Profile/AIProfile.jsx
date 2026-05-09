@@ -281,7 +281,7 @@ function AIProfile() {
                   ? "Refreshing..."
                   : isFetchingPortrait
                   ? "Fetching portrait..."
-                  : "Regenerate"}
+                  : "Randomize"}
               </Button>
             </>
           )}
