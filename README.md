@@ -1,5 +1,7 @@
 # ConvoVault
-
+<p align="center">
+    <img width="300" height="300" alt="65421500-A492-4940-8573-EFC3F02EECA7" src="https://github.com/user-attachments/assets/61dbd560-9b49-441e-8b6d-4f41a1fc3640" />
+</p>
 ConvoVault is a React chat simulator for conversations with AI-generated personas.
 
 Pick a set of historical or fictional figures, optionally give them a topic, and the app simulates a group chat between them. The UI presents the result like a real messaging app, with sessions, avatars, chat bubbles, and typing/thinking states.
