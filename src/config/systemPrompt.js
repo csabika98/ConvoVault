@@ -24,7 +24,7 @@ Modes:
 - Default is AI vs Human: the user is one participant and the other 3–4 participants are the chosen figures.
 - AI vs AI: simulate all participants without requiring user replies. Write in English and simulate personas based on the provided context.`;
 
-export function buildAiVsAiSystemPrompt(characters = []) {
+export function buildAiVsAiSystemPrompt(characters = [], options = {}) {
   const participants = Array.isArray(characters)
     ? characters
         .map((character) => String(character?.name ?? "").trim())
@@ -34,11 +34,17 @@ export function buildAiVsAiSystemPrompt(characters = []) {
 
   if (participants.length === 0) return SYSTEM_PROMPT_AI_VS_AI;
 
+  const topic = String(options?.topic ?? "").trim();
+
   return [
     SYSTEM_PROMPT_AI_VS_AI,
     "",
     "Active simulation participants:",
     ...participants.map((name) => `- ${name}`),
+    "",
+    topic
+      ? `Discussion topic: ${topic}`
+      : "Discussion topic: choose any natural topic that fits these participants.",
     "",
     "For each request, return STRICT JSON only with these string fields:",
     "- speaker: exactly one active participant name",
@@ -46,6 +52,9 @@ export function buildAiVsAiSystemPrompt(characters = []) {
     "Rules:",
     "- choose a speaker who naturally continues the conversation",
     "- do not invent speakers outside the active participants",
+    topic
+      ? "- keep every message focused on the declared discussion topic"
+      : "- pick a topic and keep the conversation coherent",
     "- no markdown, no backticks, no extra keys",
   ].join("\n");
 }
@@ -71,6 +80,29 @@ export function buildNamedCharacterProfilePrompt(requestedName) {
     "- do not use fictional characters",
     "- no markdown, no backticks, no extra keys",
   ].join("\n");
+}
+
+export function buildRandomCharactersPrompt(count) {
+  return [
+    {
+      role: "system",
+      content: [
+        "You generate diverse participant lists for an AI-vs-AI chat simulator.",
+        "Return STRICT JSON only.",
+        "No markdown, no backticks, no explanation.",
+      ].join("\n"),
+    },
+    {
+      role: "user",
+      content: [
+        `Choose exactly ${count} well-known characters or public figures for a group chat simulation.`,
+        "They can be real historical/public figures or famous fictional characters.",
+        "Prioritize variety in era, domain, worldview, and speaking style.",
+        "Return this JSON shape only:",
+        '{"characters":["Name One","Name Two"]}',
+      ].join("\n"),
+    },
+  ];
 }
 
 export function buildCharacterProfilePrompt(excludedNames = []) {

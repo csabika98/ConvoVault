@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { CharacterContext } from "@/context/characters/CharacterContext";
 import { fetchWikipediaPortraitUrl } from "@/services/wikipediaPortrait";
+import { getAiReply } from "@/services/aiRouting";
+import { buildRandomCharactersPrompt } from "@/config/systemPrompt";
 
 const MAX_CHARACTERS = 5;
 
@@ -14,6 +16,10 @@ function deriveInitials(name) {
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
     .join("");
+}
+
+function randomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function CharactersProvider({ children }) {
@@ -62,7 +68,26 @@ export function CharactersProvider({ children }) {
     );
   };
 
-  const startSimulation = async () => {
+  const randomizeCharacters = async () => {
+    const count = randomInteger(2, MAX_CHARACTERS);
+    const names = await generateRandomCharacterNames(count);
+    if (names.length < 2) return characters;
+
+    const nextCharacters = await Promise.all(
+      names.map(async (name, index) => ({
+        id: nextCharacterIdRef.current + index,
+        name,
+        avatarUrl: (await fetchWikipediaPortraitUrl(name)) || "",
+        initials: deriveInitials(name),
+      }))
+    );
+
+    nextCharacterIdRef.current += count;
+    setCharacters(nextCharacters);
+    return nextCharacters;
+  };
+
+  const startSimulation = async (options = {}) => {
     const participants = characters
       .map((character) => ({
         id: character.id,
@@ -101,6 +126,8 @@ export function CharactersProvider({ children }) {
     const request = {
       id: nextSimulationRequestIdRef.current,
       participants: participantsWithAvatars,
+      durationMs: Number(options.durationMs) || 60_000,
+      topic: String(options.topic ?? "").trim(),
     };
     nextSimulationRequestIdRef.current += 1;
     setSimulationRequest(request);
@@ -114,6 +141,7 @@ export function CharactersProvider({ children }) {
         addCharacter,
         deleteCharacter,
         updateCharacterName,
+        randomizeCharacters,
         startSimulation,
         simulationRequest,
         charactersAreFull: characters.length >= MAX_CHARACTERS,
@@ -122,4 +150,21 @@ export function CharactersProvider({ children }) {
       {children}
     </CharacterContext.Provider>
   );
+}
+
+async function generateRandomCharacterNames(count) {
+  const response = await getAiReply(buildRandomCharactersPrompt(count));
+
+  try {
+    const parsed = JSON.parse(response.content);
+    const names = Array.isArray(parsed?.characters)
+      ? parsed.characters
+          .map((name) => String(name ?? "").trim())
+          .filter(Boolean)
+      : [];
+
+    return [...new Set(names)].slice(0, count);
+  } catch {
+    return [];
+  }
 }

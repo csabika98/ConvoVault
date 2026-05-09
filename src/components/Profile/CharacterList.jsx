@@ -1,9 +1,8 @@
 import { useState } from "react";
 import CharacterCard from "./CharacterCard";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Shuffle } from "lucide-react";
 import { useCharacters } from "@/context/characters/useCharacters";
-import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -15,6 +14,7 @@ function CharacterList() {
     addCharacter,
     deleteCharacter,
     updateCharacterName,
+    randomizeCharacters,
     startSimulation,
     charactersAreFull,
   } = useCharacters();
@@ -22,6 +22,8 @@ function CharacterList() {
   const [discussionLength, setDiscussionLength] = useState("normal");
   const [declareTopic, setDeclareTopic] = useState(false);
   const [topicExplanation, setTopicExplanation] = useState("");
+  const [isRandomizing, setIsRandomizing] = useState(false);
+  const [isStartingSimulation, setIsStartingSimulation] = useState(false);
 
   const handleSelect = (charId) => {
     setSelectedId(charId);
@@ -49,8 +51,28 @@ function CharacterList() {
     updateCharacterName(charId, newName);
   };
 
-  const handleStartSimulation = () => {
-    void startSimulation();
+  const handleRandomizeCharacters = async () => {
+    setIsRandomizing(true);
+    try {
+      const nextCharacters = await randomizeCharacters();
+      setSelectedId(nextCharacters[0]?.id ?? null);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsRandomizing(false);
+    }
+  };
+
+  const handleStartSimulation = async () => {
+    setIsStartingSimulation(true);
+    try {
+      await startSimulation({
+        durationMs: getDiscussionDurationMs(discussionLength),
+        topic: declareTopic ? topicExplanation : "",
+      });
+    } finally {
+      setIsStartingSimulation(false);
+    }
   };
 
   const canStartSimulation =
@@ -70,13 +92,22 @@ function CharacterList() {
           />
         ))}
       </div>
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex justify-end gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => void handleRandomizeCharacters()}
+          disabled={isRandomizing || isStartingSimulation}
+        >
+          <Shuffle data-icon="inline-start" />
+          {isRandomizing ? "Randomizing..." : "Randomize"}
+        </Button>
         <Button
           size={charactersAreFull ? "" : "icon-sm"}
           variant="secondary"
           className="rounded-full"
           onClick={handleAddCharacter}
-          disabled={charactersAreFull}
+          disabled={charactersAreFull || isRandomizing || isStartingSimulation}
         >
           {charactersAreFull ? "Max 5 characters" : <Plus />}
         </Button>
@@ -135,13 +166,22 @@ function CharacterList() {
           </div>
         </form>
         <div className="flex justify-center pb-4">
-          <Button onClick={handleStartSimulation} disabled={!canStartSimulation}>
-            Start simulation
+          <Button
+            onClick={() => void handleStartSimulation()}
+            disabled={!canStartSimulation || isRandomizing || isStartingSimulation}
+          >
+            {isStartingSimulation ? "Starting..." : "Start simulation"}
           </Button>
         </div>
       </div>
     </>
   );
+}
+
+function getDiscussionDurationMs(length) {
+  if (length === "short") return 30_000;
+  if (length === "long") return 120_000;
+  return 60_000;
 }
 
 export default CharacterList;

@@ -60,7 +60,9 @@ function withSystemPrompt(conversation, options) {
   const mode = options?.mode === "ai-vs-ai" ? "ai-vs-ai" : "ai-vs-human";
   const systemPrompt =
     mode === "ai-vs-ai"
-      ? buildAiVsAiSystemPrompt(options?.simulationCharacters)
+      ? buildAiVsAiSystemPrompt(options?.simulationCharacters, {
+          topic: options?.simulationTopic,
+        })
       : buildAiVsHumanSystemPrompt(options?.assistantProfile);
 
   return [

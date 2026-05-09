@@ -75,8 +75,9 @@ function Chatbox({ selectedSessionId }) {
     if (participants.length < 2 || inFlightRef.current) return;
 
     const startedAt = Date.now();
-    const maxDurationMs = 60_000;
-    const maxTurns = 12;
+    const maxDurationMs = Number(request?.durationMs) || 60_000;
+    const maxTurns = Math.max(6, Math.ceil(maxDurationMs / 5_000));
+    const topic = String(request?.topic ?? "").trim();
     const conversation = [];
 
     inFlightRef.current = true;
@@ -90,7 +91,7 @@ function Chatbox({ selectedSessionId }) {
 
         const instruction =
           turn === 0
-            ? "Start the AI-vs-AI simulation. Pick the first speaker and open with a concrete, conversational message."
+            ? buildSimulationInstruction(topic)
             : "Continue the AI-vs-AI simulation with the next natural chat message.";
 
         const ai = await getAiReply(
@@ -98,6 +99,7 @@ function Chatbox({ selectedSessionId }) {
           {
             mode: "ai-vs-ai",
             simulationCharacters: participants,
+            simulationTopic: topic,
           }
         );
         if (!sessionIdsRef.current.has(sessionKey)) return;
@@ -371,6 +373,14 @@ function createAssistantAvatarSnapshot(profile) {
     avatarUrl: profile.avatarUrl,
     avatarEmoji: profile.avatarEmoji,
   };
+}
+
+function buildSimulationInstruction(topic) {
+  if (!topic) {
+    return "Start the AI-vs-AI simulation. Pick the first speaker and open with a concrete, conversational message about any natural topic.";
+  }
+
+  return `Start the AI-vs-AI simulation. Pick the first speaker and open with a concrete, conversational message about this topic only: ${topic}`;
 }
 
 function createSimulationAvatarSnapshot(speaker, participants) {
