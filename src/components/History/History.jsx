@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useSessions } from "@/context/sessions/useSessions";
+import ConvoVaultBrand from "@/components/Brand/ConvoVaultBrand";
 
 function History({ selectedSessionId, onSessionSelect }) {
   const { sessions, addSession, deleteSession, sessionsAreFull } = useSessions();
@@ -24,6 +25,7 @@ function History({ selectedSessionId, onSessionSelect }) {
   return (
     <>
       <div className="h-full min-h-0 w-full bg-background p-1">
+        <ConvoVaultBrand />
         <h1 className="mb-4">History</h1>
         <Separator className="mb-6" />
         <div className="flex flex-col gap-4 max-w-6xl mx-auto w-full">
