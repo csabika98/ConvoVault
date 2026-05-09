@@ -3,6 +3,11 @@ import CharacterCard from "./CharacterCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useCharacters } from "@/context/characters/useCharacters";
+import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 function CharacterList() {
   const {
@@ -14,6 +19,9 @@ function CharacterList() {
     charactersAreFull,
   } = useCharacters();
   const [selectedId, setSelectedId] = useState(null);
+  const [discussionLength, setDiscussionLength] = useState("normal");
+  const [declareTopic, setDeclareTopic] = useState(false);
+  const [topicExplanation, setTopicExplanation] = useState("");
 
   const handleSelect = (charId) => {
     setSelectedId(charId);
@@ -50,7 +58,7 @@ function CharacterList() {
 
   return (
     <>
-      <div className="flex w-full min-w-0 flex-col gap-1 p-2">
+      <div className="flex w-full min-w-0 flex-col gap-2 p-2">
         {characters.map((character) => (
           <CharacterCard
             key={character.id}
@@ -62,7 +70,7 @@ function CharacterList() {
           />
         ))}
       </div>
-      <div className="mt-6 flex justify-end">
+      <div className="mb-6 flex justify-end">
         <Button
           size={charactersAreFull ? "" : "icon-sm"}
           variant="secondary"
@@ -73,10 +81,64 @@ function CharacterList() {
           {charactersAreFull ? "Max 5 characters" : <Plus />}
         </Button>
       </div>
-      <div className="mt-6 flex justify-end">
-        <Button onClick={handleStartSimulation} disabled={!canStartSimulation}>
-          Start simulation
-        </Button>
+      
+      <div className="mx-auto mt-6 flex w-full max-w-lg flex-col gap-8 px-2">
+        <form
+          className="flex flex-col gap-8"
+          onSubmit={(e) => e.preventDefault()}
+        >
+          <div className="flex flex-col gap-4">
+            <Label className="text-foreground">Discussion Length</Label>
+            <ToggleGroup
+              variant="outline"
+              type="single"
+              className="w-full [&_[data-slot='toggle-group-item']]:flex-1"
+              value={discussionLength}
+              onValueChange={(value) => {
+                if (value) setDiscussionLength(value);
+              }}
+            >
+              <ToggleGroupItem value="short" aria-label="Short discussion">
+                Short
+              </ToggleGroupItem>
+              <ToggleGroupItem value="normal" aria-label="Normal discussion">
+                Normal
+              </ToggleGroupItem>
+              <ToggleGroupItem value="long" aria-label="Long discussion">
+                Long
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-4">
+              <Label htmlFor="declare-topic-switch" className="text-foreground">
+                Declare Topic
+              </Label>
+              <Switch
+                id="declare-topic-switch"
+                checked={declareTopic}
+                onCheckedChange={(checked) => {
+                  setDeclareTopic(Boolean(checked));
+                  if (!checked) setTopicExplanation("");
+                }}
+              />
+            </div>
+            {declareTopic ? (
+              <Textarea
+                id="declare-topic-text"
+                value={topicExplanation}
+                onChange={(e) => setTopicExplanation(e.target.value)}
+                placeholder="Explain the topic you wish the characters to chat about"
+                rows={4}
+              />
+            ) : null}
+          </div>
+        </form>
+        <div className="flex justify-center pb-4">
+          <Button onClick={handleStartSimulation} disabled={!canStartSimulation}>
+            Start simulation
+          </Button>
+        </div>
       </div>
     </>
   );
