@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-function CharacterList() {
+function CharacterList({ onSimulationStart }) {
   const {
     characters,
     addCharacter,
@@ -70,6 +70,7 @@ function CharacterList() {
         durationMs: getDiscussionDurationMs(discussionLength),
         topic: declareTopic ? topicExplanation : "",
       });
+      onSimulationStart?.();
     } finally {
       setIsStartingSimulation(false);
     }
@@ -92,7 +93,7 @@ function CharacterList() {
           />
         ))}
       </div>
-      <div className="mb-6 flex justify-end gap-2">
+      <div className="mb-6 flex flex-wrap justify-end gap-2">
         <Button
           size="sm"
           variant="outline"

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import convoVaultLogo from "@/assets/ConvoVault_transparent_logo.png";
+import convoVaultLogo from "@/assets/ConvoVault_transparent_logo.webp";
 
 /** Width of text content, ignoring stretched block layout (e.g. w-full when stacked). */
 function getIntrinsicTextWidth(element) {
@@ -11,7 +11,12 @@ function getIntrinsicTextWidth(element) {
   return width;
 }
 
-function ConvoVaultBrand({ className }) {
+function ConvoVaultBrand({
+  className,
+  imgClassName,
+  textClassName,
+  stackable = true,
+}) {
   const brandRowRef = useRef(null);
   const logoImgRef = useRef(null);
   const brandTextRef = useRef(null);
@@ -36,7 +41,7 @@ function ConvoVaultBrand({ className }) {
 
   useEffect(() => {
     const row = brandRowRef.current;
-    if (!row) return;
+    if (!row || !stackable) return;
 
     updateBrandLayout();
     const ro = new ResizeObserver(updateBrandLayout);
@@ -53,7 +58,7 @@ function ConvoVaultBrand({ className }) {
       cancelled = true;
       ro.disconnect();
     };
-  }, [updateBrandLayout]);
+  }, [stackable, updateBrandLayout]);
 
   return (
     <div
@@ -68,14 +73,18 @@ function ConvoVaultBrand({ className }) {
         ref={logoImgRef}
         src={convoVaultLogo}
         alt=""
-        className="h-32 w-auto shrink-0 object-contain"
+        width={512}
+        height={512}
+        decoding="async"
+        className={cn("h-24 w-auto shrink-0 object-contain sm:h-32", imgClassName)}
         onLoad={updateBrandLayout}
       />
       <span
         ref={brandTextRef}
         className={cn(
-          "whitespace-nowrap text-xl font-semibold tracking-tight text-foreground",
+          "min-w-0 whitespace-nowrap text-xl font-semibold tracking-tight text-foreground",
           stackBrand && "w-full text-center",
+          textClassName,
         )}
       >
         ConvoVault

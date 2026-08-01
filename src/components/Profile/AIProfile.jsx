@@ -190,7 +190,7 @@ function AIProfile() {
 
   return (
     <>
-      <Empty className="max-w-sm mx-auto p-6">
+      <Empty className="mx-auto w-full max-w-sm p-2 sm:p-6">
         <EmptyHeader>
           <EmptyMedia>
             <Avatar className="size-20 ring-1 ring-border">

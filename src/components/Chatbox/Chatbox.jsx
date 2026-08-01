@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { SendIcon } from "lucide-react";
 import Message, { AssistantAvatar } from "@/components/Chatbox/Message";
 
-function Chatbox({ selectedSessionId }) {
+function Chatbox({ selectedSessionId, messagesBySession, setMessagesBySession }) {
   const { sessions } = useSessions();
   const { simulationRequest } = useCharacters();
   const {
@@ -21,7 +21,6 @@ function Chatbox({ selectedSessionId }) {
   } = useProfile();
 
   const [message, setMessage] = useState("");
-  const [messagesBySession, setMessagesBySession] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const inFlightRef = useRef(false);
@@ -275,7 +274,7 @@ function Chatbox({ selectedSessionId }) {
 
       <div
         ref={messagesContainerRef}
-        className="min-h-0 flex-1 overflow-auto rounded-md p-4 text-sm text-muted-foreground scroll-smooth"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain rounded-md p-2 text-sm text-muted-foreground scroll-smooth sm:p-4"
       >
         {!selectedSessionId ? (
           "Select a session from History to view messages."
@@ -317,7 +316,7 @@ function Chatbox({ selectedSessionId }) {
         )}
       </div>
 
-      <div className="mt-4 flex min-w-0 shrink-0 items-end gap-2">
+      <div className="mt-3 flex min-w-0 shrink-0 items-end gap-2 sm:mt-4">
         <textarea
           value={hasSelectedSession ? message : ""}
           onChange={(e) => {
@@ -344,11 +343,12 @@ function Chatbox({ selectedSessionId }) {
             isLoading
           }
           rows={6}
-          className="h-20 min-h-10 max-h-72 min-w-[320px] flex-1 resize rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:opacity-80 dark:disabled:opacity-95"
+          className="h-20 min-h-10 max-h-72 w-full min-w-0 flex-1 resize-y rounded-lg border border-input bg-background px-3 py-2 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:border-border disabled:bg-muted disabled:text-muted-foreground disabled:opacity-80 sm:text-sm dark:disabled:opacity-95"
         />
         <Button
           size="icon"
           type="button"
+          className="mb-1 shrink-0"
           onClick={() => void handleSend()}
           disabled={
             !hasSelectedSession ||
