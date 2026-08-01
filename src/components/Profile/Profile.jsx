@@ -3,7 +3,7 @@ import CharacterList from "@/components/Profile/CharacterList";
 import { useProfile } from "@/context/profile/useProfile";
 import { Separator } from "@/components/ui/separator";
 
-function Profile({ selectedSessionId }) {
+function Profile({ selectedSessionId, onSimulationStart }) {
   const { getModeForSession } = useProfile();
   const activeMode = getModeForSession(selectedSessionId);
 
@@ -12,7 +12,9 @@ function Profile({ selectedSessionId }) {
       <h1 className="mb-4">AI Profile</h1>
       <Separator className="mb-6" />
       <div className="mb-2 text-sm text-muted-foreground">
-        {activeMode === "ai-vs-ai" ? <CharacterList /> : null}
+        {activeMode === "ai-vs-ai" ? (
+          <CharacterList onSimulationStart={onSimulationStart} />
+        ) : null}
         {activeMode === "ai-vs-human" ? <AIProfile /> : null}
       </div>
     </div>

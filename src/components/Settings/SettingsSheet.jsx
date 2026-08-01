@@ -13,7 +13,7 @@ import { useProfile } from "@/context/profile/useProfile";
 import { Separator } from "@/components/ui/separator";
 import ThemeToggle from "@/components/Theme/ThemeToggle";
 
-function SettingsSheet() {
+function SettingsSheet({ triggerClassName, triggerSize = "icon-sm" }) {
   const { userAvatarUrl, setUserAvatarUrl } = useProfile();
 
   const handleAvatarUpload = (event) => {
@@ -36,9 +36,9 @@ function SettingsSheet() {
       <SheetTrigger asChild>
         <Button
           type="button"
-          size="icon-sm"
+          size={triggerSize}
           variant="outline"
-          className="absolute right-4 top-4 z-10"
+          className={triggerClassName}
           aria-label="Open settings"
           title="Settings"
         >
@@ -51,62 +51,64 @@ function SettingsSheet() {
           <SheetDescription>Customize your chat experience.</SheetDescription>
         </SheetHeader>
 
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-sm font-medium">Profile</h3>
-            <p className="text-xs text-muted-foreground">
-              Manage how you appear in chat.
-            </p>
-          </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain">
+          <section className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium">Profile</h3>
+              <p className="text-xs text-muted-foreground">
+                Manage how you appear in chat.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
-            <Avatar className="size-12">
-              <AvatarImage src={userAvatarUrl || undefined} alt="Your avatar" />
-              <AvatarFallback>HU</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <div className="text-sm font-medium">Your avatar</div>
-              <div className="text-xs text-muted-foreground">
-                Used for your messages in chat.
+            <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-3">
+              <Avatar className="size-12">
+                <AvatarImage src={userAvatarUrl || undefined} alt="Your avatar" />
+                <AvatarFallback>HU</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <div className="text-sm font-medium">Your avatar</div>
+                <div className="text-xs text-muted-foreground">
+                  Used for your messages in chat.
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex gap-2">
-            <Button asChild variant="outline" className="flex-1">
-              <label>
-                <Upload data-icon="inline-start" />
-                Upload image
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={handleAvatarUpload}
-                />
-              </label>
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!userAvatarUrl}
-              onClick={() => setUserAvatarUrl("")}
-            >
-              Remove
-            </Button>
-          </div>
-        </section>
+            <div className="flex gap-2">
+              <Button asChild variant="outline" className="flex-1">
+                <label>
+                  <Upload data-icon="inline-start" />
+                  Upload image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleAvatarUpload}
+                  />
+                </label>
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!userAvatarUrl}
+                onClick={() => setUserAvatarUrl("")}
+              >
+                Remove
+              </Button>
+            </div>
+          </section>
 
-        <Separator />
+          <Separator />
 
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-sm font-medium">Appearance</h3>
-            <p className="text-xs text-muted-foreground">
-              Choose how ConvoVault looks on this device.
-            </p>
-          </div>
-          <ThemeToggle />
-        </section>
+          <section className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium">Appearance</h3>
+              <p className="text-xs text-muted-foreground">
+                Choose how ConvoVault looks on this device.
+              </p>
+            </div>
+            <ThemeToggle />
+          </section>
+        </div>
       </SheetContent>
     </Sheet>
   );

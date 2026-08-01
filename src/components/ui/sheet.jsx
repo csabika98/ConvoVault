@@ -38,10 +38,11 @@ function SheetContent({ className, children, side = "right", ...props }) {
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "fixed z-50 flex flex-col gap-4 border bg-background p-6 shadow-lg transition ease-in-out",
+          "fixed z-50 flex max-w-full flex-col gap-4 overflow-hidden border bg-background p-6 shadow-lg transition ease-in-out",
           side === "right" &&
-            "inset-y-0 right-0 h-full w-80 border-l sm:w-96",
-          side === "left" && "inset-y-0 left-0 h-full w-80 border-r sm:w-96",
+            "inset-y-0 right-0 h-full w-[88vw] max-w-sm border-l sm:max-w-md",
+          side === "left" &&
+            "inset-y-0 left-0 h-full w-[88vw] max-w-sm border-r sm:max-w-md",
           className
         )}
         {...props}

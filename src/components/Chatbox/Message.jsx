@@ -4,12 +4,16 @@ function Message({ role, content, assistantAvatar, userAvatarUrl }) {
   const isUser = role === "user";
 
   return (
-    <div className={`flex max-w-[85%] items-end gap-2 ${isUser ? "ml-auto" : ""}`}>
+    <div
+      className={`flex max-w-[90%] min-w-0 items-end gap-2 sm:max-w-[85%] ${
+        isUser ? "ml-auto" : ""
+      }`}
+    >
       {!isUser ? (
         <AssistantAvatar profile={assistantAvatar} />
       ) : null}
 
-      <div className="rounded-xl bg-muted p-3 text-sm text-foreground">
+      <div className="min-w-0 whitespace-pre-wrap break-words rounded-xl bg-muted p-3 text-sm text-foreground">
         {content}
       </div>
 
